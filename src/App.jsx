@@ -1,8 +1,38 @@
 import { useState, useEffect } from 'react';
+import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom';
 import * as tf from '@tensorflow/tfjs';
 import './App.css';
 
-function App() {
+// Create placeholder components for new routes (Quiz, Sign Up, Sign in Pages)
+const Quiz = () => {
+  return (
+    <div className="p-4">
+      <h1 className="text-2xl font-bold mb-4">Quiz Page</h1>
+      <p>Quiz content coming soon...</p>
+    </div>
+  );
+};
+
+const SignUp = () => {
+  return (
+    <div className="p-4">
+      <h1 className="text-2xl font-bold mb-4">Sign Up</h1>
+      <p>Sign up form coming soon...</p>
+    </div>
+  );
+};
+
+const LogIn = () => {
+  return (
+    <div className="p-4">
+      <h1 className="text-2xl font-bold mb-4">Log In</h1>
+      <p>Login form coming soon...</p>
+    </div>
+  );
+};
+
+// Create a Home component with the existing main content
+const Home = () => {
   const [input, setInput] = useState("");
   const [messages, setMessages] = useState([]);
   const [image, setImage] = useState(null);
@@ -81,26 +111,21 @@ function App() {
       img.onload = async () => {
         try {
           console.log("Image loaded, dimensions:", img.width, "x", img.height);
-          
-          // Create a canvas element
+
           const canvas = document.createElement('canvas');
           canvas.width = 224;
           canvas.height = 224;
           const ctx = canvas.getContext('2d');
-          
-          // Draw image to canvas
+
           ctx.drawImage(img, 0, 0, 224, 224);
           console.log("Image drawn to canvas");
 
-          // Convert to tensor
           let tensor = tf.browser.fromPixels(canvas)
             .toFloat()
             .div(255.0)
             .expandDims();
-          
-          console.log("Tensor shape:", tensor.shape);
 
-          // Make prediction
+          console.log("Tensor shape:", tensor.shape);
           console.log("Running prediction...");
           const predictions = await model.predict(tensor).data();
           console.log("Raw predictions:", Array.from(predictions));
@@ -108,8 +133,7 @@ function App() {
           const classes = ["Spinal Cord Tissue", "Small Intestine Tissue"];
           const predictedIndex = Array.from(predictions).indexOf(Math.max(...predictions));
           const confidence = (predictions[predictedIndex] * 100).toFixed(2);
-          
-          // Clean up
+
           tensor.dispose();
           resolve(`${classes[predictedIndex]} (${confidence}% confidence)`);
 
@@ -127,9 +151,9 @@ function App() {
   };
 
   return (
-    <div className="flex flex-col items-center justify-center h-screen">
+    <div className="flex flex-col items-center justify-center h-[calc(100vh-64px)]">
       {isModelLoading && (
-        <div className="absolute top-4 left-4 bg-yellow-100 text-yellow-800 p-2 rounded">
+        <div className="absolute top-20 left-4 bg-yellow-100 text-yellow-800 p-2 rounded">
           Loading model...
         </div>
       )}
@@ -137,9 +161,8 @@ function App() {
         {messages.map((msg, index) => (
           <div
             key={index}
-            className={`${
-              msg.image ? 'self-end bg-slate-200' : 'self-start bg-green-600'
-            } text-black mt-1.5 mb-1.5 mx-0 p-2.5 rounded-lg max-w-[50%] break-words`}
+            className={`${msg.image ? 'self-end bg-slate-200' : 'self-start bg-green-600'
+              } text-black mt-1.5 mb-1.5 mx-0 p-2.5 rounded-lg max-w-[50%] break-words`}
           >
             {msg.image && (
               <img src={msg.image} alt="Uploaded" className="mb-2 max-w-full rounded-lg" />
@@ -160,19 +183,15 @@ function App() {
       )}
 
       <div className="flex flex-col items-center justify-center w-[100%] h-[20%] p-2.5">
-        <input
-          type="text"
-          value={input}
-          onChange={(e) => setInput(e.target.value)}
-          className="w-[70%] p-2.5 rounded-lg outline-none border border-green-500 m-2.5"
-        />
         <div className="flex items-center w-[70%] justify-between">
+          {/* Select image */}
           <input
             type="file"
             accept="image/*"
             onChange={handleImageChange}
             className="w-[30%] p-2.5 m-2.5"
           />
+          {/* Send Button */}
           <button
             onClick={handleSend}
             className="w-[20%] p-2.5 rounded-lg border-none outline-none bg-green-600 text-white cursor-pointer hover:opacity-75"
@@ -183,6 +202,39 @@ function App() {
         </div>
       </div>
     </div>
+  );
+};
+
+// Main App component with navigation
+function App() {
+  return (
+
+    // Navbar
+    <Router>
+      <div className="min-h-screen">
+        <nav className="bg-green-600 text-white p-4 h-16">
+          <div className="container mx-auto flex items-center justify-between">
+            <Link to="/" className="text-xl font-bold hover:text-green-200">
+              Tissue Classifier
+            </Link>
+            <div className="space-x-6">
+              {/* Nav Elements */}
+              <Link to="/quiz" className="hover:text-green-200">Quiz</Link>
+              <Link to="/signup" className="hover:text-green-200">Sign Up</Link>
+              <Link to="/login" className="hover:text-green-200">Log In</Link>
+            </div>
+          </div>
+        </nav>
+        
+        {/* Routes */}
+        <Routes>
+          <Route path="/" element={<Home />} />
+          <Route path="/quiz" element={<Quiz />} />
+          <Route path="/signup" element={<SignUp />} />
+          <Route path="/login" element={<LogIn />} />
+        </Routes>
+      </div>
+    </Router>
   );
 }
 
