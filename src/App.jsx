@@ -2,6 +2,8 @@ import { useState, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom';
 import * as tf from '@tensorflow/tfjs';
 import './App.css';
+import LogIn from './LogIn'
+import Protected from './Protected'
 
 // Create placeholder components for new routes (Quiz, Sign Up, Sign in Pages)
 const Quiz = () => {
@@ -18,15 +20,6 @@ const SignUp = () => {
     <div className="p-4">
       <h1 className="text-2xl font-bold mb-4">Sign Up</h1>
       <p>Sign up form coming soon...</p>
-    </div>
-  );
-};
-
-const LogIn = () => {
-  return (
-    <div className="p-4">
-      <h1 className="text-2xl font-bold mb-4">Log In</h1>
-      <p>Login form coming soon...</p>
     </div>
   );
 };
@@ -205,11 +198,26 @@ const Home = () => {
   );
 };
 
-// Main App component with navigation
-function App() {
-  return (
+// const App = () => {
+//   return (
+//     <Router>
+//       <div>
+//         <nav>
+//           <Link to="/">Home</Link>
+//           <Link to="/login">Log In</Link>
+//           <Link to="/protected">Protected</Link>
+//         </nav>
+//         <Routes>
+//           <Route path="/login" element={<LogIn />} />
+//           <Route path="/protected" element={<Protected />} />
+//         </Routes>
+//       </div>
+//     </Router>
+//   );
+// };
 
-    // Navbar
+const App = () => {
+  return (
     <Router>
       <div className="min-h-screen">
         <nav className="bg-green-600 text-white p-4 h-16">
@@ -222,6 +230,7 @@ function App() {
               <Link to="/quiz" className="hover:text-green-200">Quiz</Link>
               <Link to="/signup" className="hover:text-green-200">Sign Up</Link>
               <Link to="/login" className="hover:text-green-200">Log In</Link>
+              <Link to="/protected" className="hover:text-green-200">Protected</Link>
             </div>
           </div>
         </nav>
@@ -232,10 +241,43 @@ function App() {
           <Route path="/quiz" element={<Quiz />} />
           <Route path="/signup" element={<SignUp />} />
           <Route path="/login" element={<LogIn />} />
+          <Route path="/protected" element={<Protected />} />
         </Routes>
       </div>
     </Router>
   );
-}
+};
+// Main App component with navigation
+// function App() {
+//   return (
+
+//     // Navbar
+//     <Router>
+//       <div className="min-h-screen">
+//         <nav className="bg-green-600 text-white p-4 h-16">
+//           <div className="container mx-auto flex items-center justify-between">
+//             <Link to="/" className="text-xl font-bold hover:text-green-200">
+//               Tissue Classifier
+//             </Link>
+//             <div className="space-x-6">
+//               {/* Nav Elements */}
+//               <Link to="/quiz" className="hover:text-green-200">Quiz</Link>
+//               <Link to="/signup" className="hover:text-green-200">Sign Up</Link>
+//               <Link to="/login" className="hover:text-green-200">Log In</Link>
+//             </div>
+//           </div>
+//         </nav>
+        
+//         {/* Routes */}
+//         <Routes>
+//           <Route path="/" element={<Home />} />
+//           <Route path="/quiz" element={<Quiz />} />
+//           <Route path="/signup" element={<SignUp />} />
+//           <Route path="/login" element={<LogIn />} />
+//         </Routes>
+//       </div>
+//     </Router>
+//   );
+// }
 
 export default App;
