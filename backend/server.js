@@ -3,27 +3,28 @@ const tf = require('@tensorflow/tfjs-node');
 const multer = require('multer');
 const cors = require('cors');
 const path = require('path');
+const connectDB = require('./db');
+const Question = require('./quiz_questions_db');
 
 const app = express();
 const PORT = 5000;
 
+// Model configuration
 const MODEL_CLASSES = ["Kidney", "Lung"];
-const MODEL_URL = path.resolve(__dirname, 'model'); // Folder containing model files
+const MODEL_URL = path.resolve(__dirname, 'model');
 let model;
 
-// Load the model
+// Load the TensorFlow model
 const loadModel = async () => {
   try {
     console.log('Loading model...');
     const modelPath = `file://${path.resolve(__dirname, 'model/model.json')}`;
     model = await tf.loadLayersModel(modelPath);
-
     console.log('Model loaded successfully.');
   } catch (error) {
     console.error('Error loading model:', error);
   }
 };
-loadModel();
 
 // Middleware
 app.use(cors());
@@ -34,7 +35,21 @@ app.use(express.urlencoded({ extended: true }));
 const storage = multer.memoryStorage();
 const upload = multer({ storage });
 
-// Predict Endpoint
+// Connect to MongoDB
+connectDB();
+
+// Quiz Questions Endpoint
+app.get('/api/questions', async (req, res) => {
+  try {
+    const questions = await Question.find();
+    res.json(questions);
+  } catch (err) {
+    console.error('Error fetching questions:', err);
+    res.status(500).json({ message: 'Error fetching questions', error: err.message });
+  }
+});
+
+// Image Prediction Endpoint
 app.post('/predict', upload.single('image'), async (req, res) => {
   if (!model) {
     return res.status(500).send({ error: 'Model not loaded' });
@@ -45,7 +60,6 @@ app.post('/predict', upload.single('image'), async (req, res) => {
   }
 
   try {
-    const buffer = req.file.buffer;
     const tensor = tf.tidy(() => {
       const decodedImage = tf.node.decodeImage(req.file.buffer);
       return decodedImage
@@ -71,7 +85,8 @@ app.post('/predict', upload.single('image'), async (req, res) => {
   }
 });
 
-// Start server
+// Initialize server
+loadModel();
 app.listen(PORT, () => {
   console.log(`Server running on http://localhost:${PORT}`);
 });
