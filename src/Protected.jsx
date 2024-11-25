@@ -11,7 +11,7 @@ const Protected = () => {
       try {
         const response = await axios.get('http://localhost:5000/protected', {
           headers: {
-            Authorization: token
+            Authorization: `Bearer ${token}`
           }
         });
         setData(response.data);

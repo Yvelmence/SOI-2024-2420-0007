@@ -3,6 +3,7 @@ const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
 const bodyParser = require('body-parser');
 const cors = require('cors');
+const mongoose = require('mongoose');
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -10,14 +11,37 @@ const PORT = process.env.PORT || 5000;
 app.use(bodyParser.json());
 app.use(cors());
 
-const users = [
-  { username: 'testuser', password: bcrypt.hashSync('testpassword', 10) }
-]; // Dummy user for testing
+// Connect to MongoDB
+mongoose.connect('mongodb+srv://yvelmencedanub:TTvRwpvktH1dXhHd@fyp.stpzo.mongodb.net/Node-API?retryWrites=true&w=majority&appName=FYP', {
+  useNewUrlParser: true,
+  useUnifiedTopology: true,
+});
+
+// Define User schema and model
+const userSchema = new mongoose.Schema({
+  username: { type: String, required: true, unique: true },
+  password: { type: String, required: true },
+});
+
+const User = mongoose.model('User', userSchema);
+
+// Register endpoint
+app.post('/register', async (req, res) => {
+  const { username, password } = req.body;
+  const hashedPassword = await bcrypt.hash(password, 10);
+  const newUser = new User({ username, password: hashedPassword });
+  try {
+    await newUser.save();
+    res.status(201).send('User registered');
+  } catch (error) {
+    res.status(400).send('Error registering user');
+  }
+});
 
 // Login endpoint
 app.post('/login', async (req, res) => {
   const { username, password } = req.body;
-  const user = users.find(u => u.username === username);
+  const user = await User.findOne({ username });
   if (user && await bcrypt.compare(password, user.password)) {
     const token = jwt.sign({ username: user.username }, 'your_jwt_secret', { expiresIn: '1h' });
     res.json({ token });
