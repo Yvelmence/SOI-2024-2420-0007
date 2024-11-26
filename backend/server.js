@@ -3,8 +3,11 @@ const tf = require('@tensorflow/tfjs-node');
 const multer = require('multer');
 const cors = require('cors');
 const path = require('path');
+const bcrypt = require('bcryptjs');
+const jwt = require('jsonwebtoken');
 const connectDB = require('./db');
 const Question = require('./quiz_questions_db');
+const User = require('./user_model');
 
 const app = express();
 const PORT = 5000;
@@ -84,6 +87,49 @@ app.post('/predict', upload.single('image'), async (req, res) => {
     res.status(500).send({ error: 'Prediction failed' });
   }
 });
+
+// Login endpoint
+app.post('/login', async (req, res) => {
+  const { username, password } = req.body;
+  const user = await User.findOne({ username });
+  if (user && await bcrypt.compare(password, user.password)) {
+    const token = jwt.sign({ username: user.username }, 'your_jwt_secret', { expiresIn: '1h' });
+    res.json({ token });
+  } else {
+    res.status(401).send('Invalid credentials');
+  }
+});
+
+// Register endpoint
+app.post('/register', async (req, res) => {
+  const { username, password } = req.body;
+  const hashedPassword = await bcrypt.hash(password, 10);
+  const newUser = new User({ username, password: hashedPassword });
+  try {
+    await newUser.save();
+    res.status(201).send('User registered');
+  } catch (error) {
+    res.status(400).send('Error registering user');
+  }
+});
+
+
+// Protected Route
+app.get('/protected', (req, res) => {
+  const token = req.headers['authorization'];
+  if (token) {
+    jwt.verify(token, 'your_jwt_secret', (err, decoded) => {
+      if (err) {
+        return res.status(401).send('Invalid token');
+      } else {
+        return res.json({ message: 'Protected data', user: decoded });
+      }
+    });
+  } else {
+    res.status(401).send('No token provided');
+  }
+});
+
 
 // Initialize server
 loadModel();
