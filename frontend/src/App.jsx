@@ -6,19 +6,17 @@ import './index.css'
 import Navbar from './components/Navbar/Navbar'
 import Home from './pages/Home'
 import Quiz from './pages/Quiz'
-import Login from './pages/Login'
-import Signup from './pages/Signup'
 
 
 function App() {
   return (
     <Router>
-      <div className="min-h-screen">
+      <div className="h-screen overflow-hidden">
         <Navbar />
         <Routes>
           {/* Public routes */}
           <Route path="/" element={<Home />} />
-          
+
           {/* Protected routes */}
           <Route
             path="/quiz"
@@ -35,13 +33,20 @@ function App() {
           />
 
           {/* Auth routes */}
-          <Route 
-            path="/login" 
-            element={<SignIn routing="path" path="/login" />} 
+          <Route
+            path="/login"
+            element={
+              <div className="flex items-center justify-center min-h-screen bg-gray-100">
+                <SignIn routing="path" path="/login" />
+              </div>}
           />
-          <Route 
-            path="/signup" 
-            element={<SignUp routing="path" path="/signup" />} 
+          <Route
+            path="/signup"
+            element={
+              <div className="flex items-center justify-center min-h-screen bg-gray-100">
+                <SignUp routing="path" path="/signup" />
+              </div>}
+
           />
         </Routes>
       </div>
