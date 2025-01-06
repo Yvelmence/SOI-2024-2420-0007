@@ -65,6 +65,7 @@ app.post('/predict', upload.single('image'), async (req, res) => {
   try {
     const tensor = tf.tidy(() => {
       const decodedImage = tf.node.decodeImage(req.file.buffer);
+      console.log('Decoded Image:', decodedImage);
       return decodedImage
         .resizeBilinear([224, 224])
         .toFloat()
@@ -74,9 +75,13 @@ app.post('/predict', upload.single('image'), async (req, res) => {
 
     const predictions = await model.predict(tensor).data();
     tensor.dispose();
+    console.log('Prepared Tensor:', tensor);
 
     const predictedIndex = Array.from(predictions).indexOf(Math.max(...predictions));
+    console.log('Predicted Index:', predictedIndex);
+
     const confidence = (predictions[predictedIndex] * 100).toFixed(2);
+    console.log('Raw predictions:', predictions);
 
     res.send({
       label: MODEL_CLASSES[predictedIndex],
