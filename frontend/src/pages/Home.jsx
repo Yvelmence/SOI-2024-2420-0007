@@ -65,8 +65,14 @@ function Home() {
   }
 
   return (
-    <div className="flex flex-col items-center justify-center h-[calc(100vh-64px)]">
-      <MessageList messages={messages} />
+    <div className="flex flex-col items-center justify-center h-[calc(100vh-64px)] bg-gray-900">
+
+      {/* Output */}
+      <div className="h-full overflow-y-auto scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100 hover:scrollbar-thumb-gray-400 transition-colors duration-200">
+        <MessageList messages={messages} />
+      </div>
+
+      {/* Buttons */}
       <ImageUploader
         onImageChange={handleImageChange}
         onSend={handleSend}

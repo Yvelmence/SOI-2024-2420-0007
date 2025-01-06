@@ -2,7 +2,7 @@ import React from 'react'
 
 function MessageList({ messages }) {
     return (
-        <div className="flex flex-col items-start justify-start w-[80%] h-4/5 overflow-y-auto p-2.5">
+        <div className="flex flex-col items-start justify-start w-[100%] h-4/5 overflow-y-auto p-2.5">
             {messages.map((msg, index) => (
                 <div
                     key={index}
@@ -10,7 +10,7 @@ function MessageList({ messages }) {
                         } text-black mt-1.5 mb-1.5 mx-0 p-2.5 rounded-lg max-w-[50%] break-words`}
                 >
                     {msg.image && (
-                        <img src={msg.image} alt="Uploaded" className="mb-2 max-w-80 rounded-lg" />
+                        <img src={msg.image} alt="Uploaded" className="mb-2 w-60 rounded-lg" />
                     )}
                     {msg.text}
                 </div>

@@ -36,17 +36,34 @@ function App() {
           <Route
             path="/login"
             element={
-              <div className="flex items-center justify-center min-h-screen bg-gray-100">
-                <SignIn routing="path" path="/login" />
-              </div>}
+              <div
+                className="relative flex items-center justify-center min-h-screen bg-cover bg-center"
+                style={{
+                  backgroundImage: "url('/images/jtrp260418.webp')",
+                }}
+              >
+                <div className="absolute inset-0 bg-black opacity-25"></div>
+                <div className="relative z-10">
+                  <SignIn routing="path" path="/login" />
+                </div>
+              </div>
+            }
           />
           <Route
             path="/signup"
             element={
-              <div className="flex items-center justify-center min-h-screen bg-gray-100">
-                <SignUp routing="path" path="/signup" />
-              </div>}
-
+              <div
+                className="relative flex items-center justify-center min-h-screen bg-cover bg-center"
+                style={{
+                  backgroundImage: "url('/images/jtrp260418.webp')",
+                }}
+              >
+                <div className="absolute inset-0 bg-black opacity-25"></div>
+                <div className="relative z-10">
+                  <SignUp routing="path" path="/signup" />
+                </div>
+              </div>
+            }
           />
         </Routes>
       </div>
