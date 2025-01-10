@@ -1,22 +1,27 @@
-import React from 'react'
+import React from 'react';
 
 function MessageList({ messages }) {
-    return (
-        <div className="flex flex-col items-start justify-start w-[100%] h-4/5 overflow-y-auto p-2.5">
-            {messages.map((msg, index) => (
-                <div
-                    key={index}
-                    className={`${msg.image ? 'self-end bg-slate-200' : 'self-start bg-green-600'
-                        } text-black mt-1.5 mb-1.5 mx-0 p-2.5 rounded-lg max-w-[50%] break-words`}
-                >
-                    {msg.image && (
-                        <img src={msg.image} alt="Uploaded" className="mb-2 w-60 rounded-lg" />
-                    )}
-                    {msg.text}
-                </div>
-            ))}
+  return (
+    <div className="p-4 space-y-4">
+      {messages.map((message, index) => (
+        <div key={index} className="flex flex-col space-y-2">
+          {message.image && (
+            <img 
+              src={message.image} 
+              alt="Uploaded content" 
+              className="max-w-xs rounded-lg"
+            />
+          )}
+          {message.text && (
+            <p className="text-white bg-gray-700 rounded-lg p-3">
+              {message.text}
+            </p>
+          )}
+          {message.component && message.component}
         </div>
-    )
+      ))}
+    </div>
+  );
 }
 
-export default MessageList
+export default MessageList;
