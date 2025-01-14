@@ -9,7 +9,8 @@ function Navbar() {
         <Link to="/" className="hover:underline">Tissue Finder</Link>
         <div className="flex space-x-4 items-center">
           <SignedIn>
-            <Link to="/quiz" className="hover:underline">Quiz</Link>
+            <Link to="/chatbot" className="hover:underline">ChatBot</Link>
+            <Link to="/quizzes" className="hover:underline">Quiz</Link>
             <UserButton afterSignOutUrl="/" />
           </SignedIn>
           <SignedOut>

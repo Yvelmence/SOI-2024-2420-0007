@@ -4,8 +4,9 @@ import { SignIn, SignUp, SignedIn, SignedOut, RedirectToSignIn } from '@clerk/cl
 
 import './index.css'
 import Navbar from './components/Navbar/Navbar'
-import Home from './pages/Home'
+import ChatBot from './pages/ChatBot'
 import Quiz from './pages/Quiz'
+import Home from './pages/Home'
 
 
 function App() {
@@ -16,10 +17,11 @@ function App() {
         <Routes>
           {/* Public routes */}
           <Route path="/" element={<Home />} />
+          <Route path="/chatbot" element={<ChatBot />} />
 
           {/* Protected routes */}
           <Route
-            path="/quiz"
+            path="/quizzes"
             element={
               <>
                 <SignedIn>
@@ -29,6 +31,12 @@ function App() {
                   <RedirectToSignIn />
                 </SignedOut>
               </>
+            }
+          />
+          <Route
+            path="/quiz/:collectionName"
+            element={
+              <Quiz />
             }
           />
 

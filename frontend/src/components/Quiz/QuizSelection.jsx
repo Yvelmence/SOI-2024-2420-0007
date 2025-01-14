@@ -7,7 +7,7 @@ function QuizSelection() {
 
   // Fetch quizzes metadata from the backend
   useEffect(() => {
-    fetch('http://localhost:5000/api/quizzes')
+    fetch('http://localhost:3000/api/quizzes')
       .then((response) => response.json())
       .then((data) => {
         console.log('Fetched quizzes:', data);
