@@ -7,6 +7,7 @@ import Navbar from './components/Navbar/Navbar'
 import ChatBot from './pages/ChatBot'
 import Quiz from './pages/Quiz'
 import Home from './pages/Home'
+import QuizSelection from './components/Quiz/QuizSelection'
 
 
 function App() {
@@ -17,15 +18,21 @@ function App() {
         <Routes>
           {/* Public routes */}
           <Route path="/" element={<Home />} />
-          <Route path="/chatbot" element={<ChatBot />} />
 
           {/* Protected routes */}
+
+          <Route
+            path="/chatbot"
+            element={
+              <ChatBot />
+            } />
+
           <Route
             path="/quizzes"
             element={
               <>
                 <SignedIn>
-                  <Quiz />
+                  <QuizSelection />
                 </SignedIn>
                 <SignedOut>
                   <RedirectToSignIn />
@@ -33,6 +40,7 @@ function App() {
               </>
             }
           />
+
           <Route
             path="/quiz/:collectionName"
             element={

@@ -12,7 +12,7 @@ const mongoose = require('mongoose');
 
 
 const app = express();
-const PORT = 5000;
+const PORT = 3000;
 
 // Model configuration
 const MODEL_CLASSES = ["Kidney", "Lung"];
