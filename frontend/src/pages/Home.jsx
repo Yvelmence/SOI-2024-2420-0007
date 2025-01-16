@@ -1,98 +1,127 @@
-import React, { useState } from 'react';
-import axios from 'axios';
-import ImageUploader from '../components/Home/ImageUploader';
-import MessageList from '../components/Home/MessageList';
-import TissueDescription from '../components/Home/TissueDescription';
+import React from 'react';
+import Slider from "react-slick";
+import "slick-carousel/slick/slick.css";
+import "slick-carousel/slick/slick-theme.css";
+import { useNavigate } from "react-router-dom";
 
 function Home() {
-  const [input, setInput] = useState("");
-  const [messages, setMessages] = useState([]);
-  const [image, setImage] = useState(null);
 
-  const handleSend = async () => {
-    if (input.trim() || image) {
-      const userMessage = { image, text: input };
-      setMessages(prevMessages => [...prevMessages, userMessage]);
-      setInput("");
-
-      if (image) {
-        try {
-          const predictionText = await predictImage(image);
-          const organType = predictionText.split(' ')[0].toLowerCase(); // Extract organ type
-          
-          // Add prediction message
-          const botMessage = {
-            image: null,
-            text: `Prediction: ${predictionText}`,
-          };
-          setMessages(prevMessages => [...prevMessages, botMessage]);
-
-          // Add educational content if it's a lung or kidney
-          if (organType === 'lung' || organType === 'kidney') {
-            const educationalMessage = {
-              image: null,
-              text: null,
-              component: <TissueDescription organType={organType} />
-            };
-            setMessages(prevMessages => [...prevMessages, educationalMessage]);
-          }
-        } catch (error) {
-          console.error("Prediction error:", error);
-          const errorMessage = {
-            image: null,
-            text: `Error: ${error.message}. Please try again.`,
-          };
-          setMessages(prevMessages => [...prevMessages, errorMessage]);
-        }
-      }
-      setImage(null);
+    const navigate = useNavigate()
+    const gotToNewPage = () => {
+        navigate("/customer");
     }
-  };
+    
+    const settings = {
+        dots: true,
+        infinite: false,
+        speed: 500,
+        slidesToShow: 4,
+        slidesToScroll: 4,
+        initialSlide: 0,
+        dotsClass: "slick-dots custom-dots",
+        responsive: [
+            {
+                breakpoint: 1024,
+                settings: {
+                    slidesToShow: 3,
+                    slidesToScroll: 3,
+                    infinite: true,
+                    dots: true
+                }
+            },
+            {
+                breakpoint: 600,
+                settings: {
+                    slidesToShow: 2,
+                    slidesToScroll: 2,
+                    initialSlide: 2
+                }
+            },
+            {
+                breakpoint: 480,
+                settings: {
+                    slidesToShow: 1,
+                    slidesToScroll: 1
+                }
+            }
+        ]
+    };
 
-  const handleImageChange = (e) => {
-    const file = e.target.files[0];
-    if (file) {
-      if (!file.type.startsWith('image/')) {
-        alert('Please upload an image file');
-        return;
-      }
-      const imageUrl = URL.createObjectURL(file);
-      setImage(imageUrl);
-    }
-  };
-
-  const predictImage = async (imageUrl) => {
-    try {
-      const formData = new FormData();
-      const response = await fetch(imageUrl);
-      const blob = await response.blob();
-      formData.append('image', blob);
-
-      const res = await axios.post('http://localhost:5000/predict', formData, {
-        headers: { 'Content-Type': 'multipart/form-data' },
-      });
-
-      return `${res.data.label} (${res.data.confidence} confidence)`;
-    } catch (error) {
-      throw new Error("Failed to get prediction from the server");
-    }
-  };
-
-  return (
-    <div className="flex flex-col items-center justify-center h-[calc(100vh-64px)] bg-gray-900">
-      {/* Output */}
-      <div className="h-full overflow-y-auto scrollbar-thin scrollbar-thumb-black scrollbar-track-transparent">
-        <MessageList messages={messages} />
-      </div>
-
-      {/* Buttons */}
-      <ImageUploader
-        onImageChange={handleImageChange}
-        onSend={handleSend}
-        image={image}
-      />
-    </div>
-  );
+    return (
+        <div className="min-h-screen bg-gray-900 p-8 flex flex-col items-center justify-center">
+            <style>
+                {`
+                    .custom-dots li button:before {
+                        color: #ec4899 !important;
+                        opacity: 0.25;
+                        font-size: 12px;
+                    }
+                    
+                    .custom-dots li.slick-active button:before {
+                        color: #ec4899 !important;
+                        opacity: 1;
+                    }
+                `}
+            </style>
+            <h1 className="text-6xl font-bold text-white mb-16 text-center tracking-wider">
+                Learn about Tissues here!
+            </h1>
+            <div className="max-w-7xl w-full">
+                <Slider {...settings}>
+                    {data.map((d, index) => (
+                        <div key={index} className="px-4 h-[500px]">
+                            <div className="bg-gray-800 rounded-xl overflow-hidden shadow-xl h-full flex flex-col transform transition-transform duration-300 hover:scale-105">
+                                <div className="w-full h-56 flex-shrink-0">
+                                    <img
+                                        src={d.img}
+                                        alt={d.name}
+                                        className="w-full h-full object-cover"
+                                    />
+                                </div>
+                                <div className="p-6 flex flex-col flex-grow">
+                                    <h2 className="text-2xl font-bold text-white mb-4">{d.name}</h2>
+                                    <p className="text-gray-300 text-sm leading-relaxed flex-grow">
+                                        {d.info}
+                                    </p>
+                                    <button onClick={""} className="w-full bg-pink-500 hover:bg-pink-600 text-white font-semibold py-3 px-6 rounded-lg transition-colors duration-200 transform hover:scale-105 mt-4">
+                                        Read More
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    ))}
+                </Slider>
+            </div>
+        </div>
+    );
 }
+
+const data = [
+    {
+        name: "Kidney",
+        img: "./images/cardImages/kidney x100 H&E 75.jpg",
+        info: "Without your kidney, your body would be filled with waste. Give our kidneys some appreciation and let's look at what makes it up under the microscope!",
+    },
+    {
+        name: "Lung",
+        img: "./images/cardImages/kidney x100 H&E 76.jpg",
+        info: "Lungs are important organ that helps with gaseous exchange. Have you ever wonder how does it looks like under microscope? Click here!",
+    },
+    {
+        name: "Liver",
+        img: "./images/cardImages/kidney x100 H&E 77.jpg",
+        info: "Liver is one of the largest organ in the body and helps to detoxifies chemicals and metabolizes drugs. Click here to find out more about liver!",
+    },
+    {
+        name: "Testes",
+        img: "./images/cardImages/kidney x100 H&E 78.jpg",
+        info: "Other than the ovaries, testes is the other organ that plays a part in reproduction. Take a look at which structures play a major role in sperm development!",
+    },
+    {
+        name: "Small Intestine",
+        img: "./images/cardImages/kidney x100 H&E 79.jpg",
+        info: "Small intestine helps with digestion and allows nutrients to take place. Click here to find more about the different structures of the small intestine!",
+    }
+];
 
 export default Home;
