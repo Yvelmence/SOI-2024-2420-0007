@@ -8,9 +8,11 @@ const jwt = require('jsonwebtoken');
 const connectDB = require('./db');
 const Question = require('./quiz_questions_db');
 const User = require('./user_model');
+const mongoose = require('mongoose');
+
 
 const app = express();
-const PORT = 5000;
+const PORT = 3000;
 
 // Model configuration
 const MODEL_CLASSES = ["Kidney", "Lung"];
@@ -93,47 +95,47 @@ app.post('/predict', upload.single('image'), async (req, res) => {
   }
 });
 
-// Login endpoint
-app.post('/login', async (req, res) => {
-  const { username, password } = req.body;
-  const user = await User.findOne({ username });
-  if (user && await bcrypt.compare(password, user.password)) {
-    const token = jwt.sign({ username: user.username }, 'your_jwt_secret', { expiresIn: '1h' });
-    res.json({ token });
-  } else {
-    res.status(401).send('Invalid credentials');
-  }
-});
-
-// Register endpoint
-app.post('/register', async (req, res) => {
-  const { username, password } = req.body;
-  const hashedPassword = await bcrypt.hash(password, 10);
-  const newUser = new User({ username, password: hashedPassword });
+// Endpoint to fetch all quizzes metadata
+app.get('/api/quizzes', async (req, res) => {
   try {
-    await newUser.save();
-    res.status(201).send('User registered');
-  } catch (error) {
-    res.status(400).send('Error registering user');
+    const quizzes = await mongoose.connection.collection('quizzes').find().toArray();
+    res.json(quizzes); // Send metadata for all quizzes
+  } catch (err) {
+    console.error('Error fetching quizzes:', err);
+    res.status(500).json({ message: 'Error fetching quizzes', error: err.message });
   }
 });
 
+// Dynamic endpoint to fetch quiz questions based on collectionName from /api/quizzes
+app.get('/api/quizzes/:collectionName', async (req, res) => {
+  const { collectionName } = req.params;
 
-// Protected Route
-app.get('/protected', (req, res) => {
-  const token = req.headers['authorization'];
-  if (token) {
-    jwt.verify(token, 'your_jwt_secret', (err, decoded) => {
-      if (err) {
-        return res.status(401).send('Invalid token');
-      } else {
-        return res.json({ message: 'Protected data', user: decoded });
-      }
-    });
-  } else {
-    res.status(401).send('No token provided');
+  try {
+    // Fetch questions from the dynamic collectionName
+    const questions = await mongoose.connection.collection(collectionName).find().toArray();
+    res.json(questions); // Send questions back to the frontend
+  } catch (err) {
+    console.error('Error fetching quiz questions:', err);
+    res.status(500).json({ message: 'Error fetching quiz questions', error: err.message });
   }
 });
+
+// Fallback route if collection is not found
+app.get('/api/:collectionName', async (req, res) => {
+  const { collectionName } = req.params;
+
+  try {
+    const questions = await mongoose.connection.collection(collectionName).find().toArray();
+    if (!questions) {
+      return res.status(404).json({ message: `Collection ${collectionName} not found` });
+    }
+    res.json(questions);
+  } catch (err) {
+    console.error(`Error fetching data from collection ${collectionName}:`, err);
+    res.status(500).json({ message: 'Error fetching collection data', error: err.message });
+  }
+});
+
 
 
 // Initialize server

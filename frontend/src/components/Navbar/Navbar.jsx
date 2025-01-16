@@ -10,7 +10,11 @@ function Navbar() {
         <div className="flex space-x-4 items-center">
           <SignedIn>
             <Link to="/chatbot" className="hover:underline">ChatBot</Link>
+<<<<<<< HEAD
             <Link to="/quiz" className="hover:underline">Quiz</Link>
+=======
+            <Link to="/quizzes" className="hover:underline">Quiz</Link>
+>>>>>>> 1f9a9b0d35dad57905b5d3c5b5676993d319577d
             <UserButton afterSignOutUrl="/" />
           </SignedIn>
           <SignedOut>
