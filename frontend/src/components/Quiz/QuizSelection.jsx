@@ -11,13 +11,10 @@ function QuizSelection() {
       .then((response) => response.json())
       .then((data) => {
         console.log('Fetched quizzes:', data);
-        
         setQuizzes(data);
       })
-      
       .catch((err) => console.error('Error fetching quizzes:', err));
   }, []);
-  
 
   const handleQuizSelection = (collectionName) => {
     navigate(`/quiz/${collectionName}`);
@@ -30,8 +27,8 @@ function QuizSelection() {
         <table className="w-full table-auto text-left border-collapse mx-auto">
           <thead>
             <tr className="bg-gray-200 text-gray-700">
-              <th className="px-10 py-3 border-b text-lg text-center">Quiz Name</th>
-              <th className="px-10 py-3 border-b text-lg text-center">Action</th>
+              <th className="px-4 py-3 border-b text-lg text-center">Quiz Name</th>
+              <th className="px-4 py-3 border-b text-lg text-center">Action</th>
             </tr>
           </thead>
           <tbody>
@@ -53,10 +50,6 @@ function QuizSelection() {
       </div>
     </div>
   );
-  
-  
 }
 
 export default QuizSelection;
-
-

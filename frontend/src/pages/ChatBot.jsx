@@ -79,18 +79,20 @@ function ChatBot() {
   };
 
   return (
-    <div className="flex flex-col items-center justify-center h-[calc(100vh-64px)] bg-gray-900">
+    <div className="flex flex-col items-center justify-between h-screen bg-gray-900 p-4">
       {/* Output */}
-      <div className="h-full overflow-y-auto scrollbar-thin scrollbar-thin-black scrollbar-track-transparent">
+      <div className="flex-1 overflow-y-auto w-full">
         <MessageList messages={messages} />
       </div>
 
       {/* Buttons */}
-      <ImageUploader
-        onImageChange={handleImageChange}
-        onSend={handleSend}
-        image={image}
-      />
+      <div className="w-full">
+        <ImageUploader
+          onImageChange={handleImageChange}
+          onSend={handleSend}
+          image={image}
+        />
+      </div>
     </div>
   );
 }

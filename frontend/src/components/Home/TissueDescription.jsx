@@ -52,12 +52,12 @@ function TissueDescription({ organType }) {
   if (!content) return null;
 
   return (
-    <div className="w-full max-w-2xl rounded-lg bg-gray-800 text-white mb-4 p-6">
-      <h2 className="text-xl font-bold mb-3">{content.title}</h2>
-      <p className="mb-4">{content.description}</p>
+    <div className="w-full max-w-2xl rounded-lg bg-gray-800 text-white mb-4 p-6 mx-auto">
+      <h2 className="text-2xl font-bold mb-3">{content.title}</h2>
+      <p className="mb-4 text-base">{content.description}</p>
       {content.learningPoints.map((section, index) => (
         <div key={index} className="mb-4">
-          <h3 className="font-semibold mb-2">{section.title}</h3>
+          <h3 className="text-xl font-semibold mb-2">{section.title}</h3>
           <ul className="list-disc pl-6">
             {section.points.map((point, idx) => (
               <li key={idx} className="mb-1 text-gray-200">{point}</li>
