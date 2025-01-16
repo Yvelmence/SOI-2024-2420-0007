@@ -19,7 +19,7 @@ function ChatBot() {
         try {
           const predictionText = await predictImage(image);
           const organType = predictionText.split(' ')[0].toLowerCase(); // Extract organ type
-          
+
           // Add prediction message
           const botMessage = {
             image: null,
@@ -79,14 +79,14 @@ function ChatBot() {
   };
 
   return (
-    <div className="flex flex-col items-center justify-between h-screen bg-gray-900 p-4">
-      {/* Output */}
-      <div className="flex-1 overflow-y-auto w-full">
+    <div className="flex flex-col h-screen bg-gray-900">
+      {/* Message List */}
+      <div className="flex-1 overflow-y-auto p-4">
         <MessageList messages={messages} />
       </div>
 
-      {/* Buttons */}
-      <div className="w-full">
+      {/* Input Area */}
+      <div className="sticky bottom-0 w-full bg-gray-800 border-t border-gray-700 p-4">
         <ImageUploader
           onImageChange={handleImageChange}
           onSend={handleSend}
