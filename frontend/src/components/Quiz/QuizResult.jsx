@@ -1,4 +1,4 @@
-import React from 'react'
+import React from 'react';
 
 function QuizResult({ score, totalQuestions, answerDetails }) {
     return (
@@ -40,4 +40,4 @@ function QuizResult({ score, totalQuestions, answerDetails }) {
     )
 }
 
-export default QuizResult
+export default QuizResult;

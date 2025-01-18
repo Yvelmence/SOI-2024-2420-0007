@@ -31,7 +31,7 @@ function Quiz() {
     if (collectionName) {
       fetchQuestions();
     }
-  }, [collectionName]); 
+  }, [collectionName]);
 
   // Handle answer option selection and scoring
   const handleAnswerOptionClick = (index) => {
@@ -83,19 +83,19 @@ function Quiz() {
   if (error) return <div className="text-center p-4 text-red-500">Error: {error}</div>;
 
   return (
-    <div className="quiz-container p-6 max-w-3xl mx-auto bg-gray-100 rounded-lg shadow-md">
+    <div className="flex flex-col h-screen bg-gray-900"> {/* Keep the original page background */}
       {showScore ? (
         <div className="score-section text-center">
-          <p className="text-2xl font-bold text-blue-500">You scored {score} out of {questions.length}</p>
-          <p className="text-xl">Correct Answers: {score}</p>
-          <p className="text-xl">Incorrect Answers: {questions.length - score}</p>
+          <p className="text-2xl font-bold text-white">You scored {score} out of {questions.length}</p>
+          <p className="text-xl text-white">Correct Answers: {score}</p>
+          <p className="text-xl text-white">Incorrect Answers: {questions.length - score}</p>
 
           {/* Answer Summary Table */}
           <div className="summary-section mt-5">
-            <h3 className="text-xl font-semibold">Question Summary</h3>
+            <h3 className="text-xl font-semibold text-white">Question Summary</h3>
             <table className="w-full mt-4 table-auto border-collapse">
               <thead>
-                <tr className="bg-gray-200">
+                <tr className="bg-gray-100">
                   <th className="px-3 py-2 border">Question</th>
                   <th className="px-3 py-2 border">Your Answer</th>
                   <th className="px-3 py-2 border">Correct Answer</th>
@@ -105,9 +105,9 @@ function Quiz() {
               <tbody>
                 {answerDetails.map((detail, index) => (
                   <tr key={index}>
-                    <td className="px-3 py-2 border">{detail.questionText}</td>
-                    <td className="px-3 py-2 border">{detail.selectedAnswer}</td>
-                    <td className="px-3 py-2 border">{detail.correctAnswer}</td>
+                    <td className="px-3 py-2 border text-white">{detail.questionText}</td>
+                    <td className="px-3 py-2 border text-white">{detail.selectedAnswer}</td>
+                    <td className="px-3 py-2 border text-white">{detail.correctAnswer}</td>
                     <td className={`px-3 py-2 border ${detail.isCorrect ? 'text-green-500 font-bold' : 'text-red-500 font-bold'}`}>
                       {detail.isCorrect ? 'Correct' : 'Incorrect'}
                     </td>
@@ -118,27 +118,27 @@ function Quiz() {
           </div>
         </div>
       ) : (
-        <div className="question-section">
-          <div className="question-num text-lg mb-4">
+        <div className="question-section text-center p-6 rounded-lg shadow-md w-full max-w-3xl mx-auto bg-gray-800"> {/* Added a contrasting background */}
+          <div className="question-num text-lg mb-4 text-white"> {/* Changed to white color for question number */}
             Question {currentQuestion + 1} of {questions.length}
           </div>
-          <div className="question-text text-2xl font-bold text-gray-800 mb-5">
+          <div className="question-text text-2xl font-semibold text-gray-100 mb-5"> {/* Light text for contrast */}
             {questions[currentQuestion].question}
           </div>
           {questions[currentQuestion].image && (
             <img
               src={questions[currentQuestion].image}
               alt="Question Illustration"
-              className="quiz-image w-72 h-48 object-contain border border-gray-300 p-2 bg-gray-200 mb-5"
+              className="quiz-image w-72 h-48 object-contain border border-gray-700 p-2 bg-gray-800 mb-5"
             />
           )}
-          <div className="answer-section flex flex-col gap-2">
+          <div className="answer-section flex flex-col items-center gap-2">
             {questions[currentQuestion].answerOptions.map((answerOption, index) => (
               <button
                 key={index}
                 onClick={() => handleAnswerOptionClick(index)}
-                className={`w-3/4 bg-blue-500 text-white p-3 rounded-md text-left transition-all duration-300 
-                  ${selectedOption === index ? 'bg-green-500' : 'hover:bg-blue-700 focus:ring-2 focus:ring-blue-500'}`}
+                className={`w-3/4 bg-teal-500 text-white p-3 rounded-md text-left transition-all duration-300 
+                  ${selectedOption === index ? 'bg-teal-700' : 'hover:bg-teal-600 focus:ring-2 focus:ring-teal-500'}`} // Updated to teal color for answers
               >
                 {answerOption.answerText}
               </button>
@@ -146,10 +146,10 @@ function Quiz() {
           </div>
 
           {/* Navigation Buttons */}
-          <div className="navigation-buttons flex justify-between mt-5">
+          <div className="navigation-buttons flex justify-between mt-5 w-full max-w-md mx-auto">
             <button
               onClick={handlePrevious}
-              className="previous-button px-4 py-2 bg-blue-500 text-white rounded-md disabled:bg-gray-400 cursor-pointer disabled:cursor-not-allowed"
+              className="previous-button px-4 py-2 bg-blue-500 text-gray-900 rounded-md disabled:bg-gray-400 cursor-pointer disabled:cursor-not-allowed"
               disabled={currentQuestion === 0}
             >
               Previous
@@ -157,7 +157,7 @@ function Quiz() {
 
             <button
               onClick={handleSubmit}
-              className="submit-button px-4 py-2 bg-blue-500 text-white rounded-md disabled:bg-gray-400 cursor-pointer disabled:cursor-not-allowed"
+              className="submit-button px-4 py-2 bg-blue-500 text-gray-900 rounded-md disabled:bg-gray-400 cursor-pointer disabled:cursor-not-allowed"
               disabled={selectedOption === null}
             >
               {currentQuestion === questions.length - 1 ? 'Submit Quiz' : 'Next'}
@@ -170,5 +170,3 @@ function Quiz() {
 }
 
 export default Quiz;
-
-

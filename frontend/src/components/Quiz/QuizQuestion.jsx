@@ -22,8 +22,7 @@ function QuizQuestion({ currentQuestion, totalQuestions, questionData, selectedO
             key={index}
             onClick={() => onAnswerSelect(index)}
             className={`w-full sm:w-3/4 bg-blue-500 text-white p-3 rounded-md text-left transition-all duration-300 
-              ${selectedOption === index ? 'bg-green-500' : 'hover:bg-blue-700 focus:ring-2 focus:ring-blue-500'}
-            `}
+              ${selectedOption === index ? 'bg-green-500' : 'hover:bg-blue-700 focus:ring-2 focus:ring-blue-500'}`}
           >
             {answer.answerText}
           </button>
