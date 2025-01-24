@@ -1,56 +1,53 @@
 import React, { useState } from 'react';
 import { useUser } from '@clerk/clerk-react';
+import { useNavigate } from 'react-router-dom';
 import Slider from "react-slick";
 import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
 
 function Home() {
-  // 1. Grab user info from Clerk
+  const navigate = useNavigate();
   const { user } = useUser();
 
-  // 2. Check for an admin role in user's public metadata (adjust as needed)
-  const isAdmin = user?.publicMetadata?.role === "admin";
+  // Check if user is admin (role stored in publicMetadata.role)
+  const isAdmin = user?.publicMetadata?.role === 'admin';
 
-  // 3. Slider items in state
+  // Slider data in state
   const [sliderData, setSliderData] = useState([
     {
       name: "Kidney",
       img: "./images/cardImages/kidney x100 H&E 75.jpg",
-      info: "Without your kidney, your body would be filled with waste. ...",
+      info: "Without your kidney, your body would be filled with waste. Let's see what it looks like under the microscope!",
     },
     {
       name: "Lung",
       img: "./images/cardImages/kidney x100 H&E 76.jpg",
-      info: "Lungs are important organs that help with gaseous exchange. ...",
+      info: "Lungs are essential for gaseous exchange. Ever wonder how it looks under a microscope?",
     },
     {
       name: "Liver",
       img: "./images/cardImages/kidney x100 H&E 77.jpg",
-      info: "The liver is one of the largest organs in the body ...",
+      info: "The liver is one of the largest organs in the body. Click here to find out more!",
     },
     {
       name: "Testes",
       img: "./images/cardImages/kidney x100 H&E 78.jpg",
-      info: "Other than the ovaries, the testes also play a role in reproduction. ...",
+      info: "Testes are vital in sperm production. Learn about their microscopic structure here!",
     },
     {
       name: "Small Intestine",
       img: "./images/cardImages/kidney x100 H&E 79.jpg",
-      info: "The small intestine helps with digestion and absorption of nutrients. ...",
+      info: "The small intestine helps with nutrient absorption. Read more to discover its unique folds!",
     }
   ]);
 
-  // 4. State to control forms
+  // Admin-only form states
   const [showAddForm, setShowAddForm] = useState(false);
   const [showEditForm, setShowEditForm] = useState(false);
   const [editIndex, setEditIndex] = useState(null);
 
-  // 5. Form data
-  const [formData, setFormData] = useState({
-    name: "",
-    img: "",
-    info: ""
-  });
+  // Form data for adding/editing
+  const [formData, setFormData] = useState({ name: "", img: "", info: "" });
 
   // Slider settings
   const settings = {
@@ -77,8 +74,9 @@ function Home() {
     ]
   };
 
- 
-  // ADD ITEM
+  // -------------------------
+  // ADD ITEM (Admin)
+  // -------------------------
   const handleAddItem = (e) => {
     e.preventDefault();
     setSliderData([...sliderData, formData]);
@@ -86,7 +84,9 @@ function Home() {
     setShowAddForm(false);
   };
 
-  // EDIT ITEM
+  // -------------------------
+  // EDIT ITEM (Admin)
+  // -------------------------
   const handleEditClick = (index) => {
     setEditIndex(index);
     setFormData(sliderData[index]);
@@ -103,12 +103,16 @@ function Home() {
     setShowEditForm(false);
   };
 
-  // DELETE ITEM
+  // -------------------------
+  // DELETE ITEM (Admin)
+  // -------------------------
   const handleDeleteItem = (index) => {
     setSliderData(sliderData.filter((_, i) => i !== index));
   };
 
-  // CANCEL ANY FORM
+  // -------------------------
+  // CANCEL FORM
+  // -------------------------
   const handleCancel = () => {
     setFormData({ name: "", img: "", info: "" });
     setShowAddForm(false);
@@ -116,9 +120,16 @@ function Home() {
     setEditIndex(null);
   };
 
+  // -------------------------
+  // READ MORE - Navigate to /tissue/:name
+  // -------------------------
+  const handleReadMore = (itemName) => {
+    navigate(`/tissue/${itemName.toLowerCase()}`);
+  };
+
   return (
-    <div className="min-h-screen bg-gray-900 p-8 flex flex-col items-center justify-center">
-      {/* Slick custom dots style */}
+    <div className="min-h-screen bg-gray-900 p-8 flex flex-col items-center justify-center relative">
+      {/* Custom styling for slick dots */}
       <style>
         {`
           .custom-dots li button:before {
@@ -137,7 +148,7 @@ function Home() {
         Learn about Tissues here!
       </h1>
 
-      {/* Only show "Add New Tissue" if user is admin */}
+      {/* Show the add button only to admins */}
       {isAdmin && (
         <button
           onClick={() => setShowAddForm(true)}
@@ -147,11 +158,13 @@ function Home() {
         </button>
       )}
 
+      {/* Tissue Slider */}
       <div className="max-w-7xl w-full">
         <Slider {...settings}>
           {sliderData.map((item, index) => (
             <div key={index} className="px-4 h-[500px]">
               <div className="bg-gray-800 rounded-xl overflow-hidden shadow-xl h-full flex flex-col transform transition-transform duration-300 hover:scale-105">
+                {/* Card Image */}
                 <div className="w-full h-56 flex-shrink-0">
                   <img
                     src={item.img}
@@ -159,13 +172,23 @@ function Home() {
                     className="w-full h-full object-cover"
                   />
                 </div>
+
+                {/* Card Text */}
                 <div className="p-6 flex flex-col flex-grow">
                   <h2 className="text-2xl font-bold text-white mb-4">{item.name}</h2>
                   <p className="text-gray-300 text-sm leading-relaxed flex-grow">
                     {item.info}
                   </p>
 
-                  {/* Show Edit/Delete only if admin */}
+                  {/* READ MORE (visible to everyone) */}
+                  <button
+                    onClick={() => handleReadMore(item.name)}
+                    className="w-full bg-pink-500 hover:bg-pink-600 text-white font-semibold py-3 px-6 rounded-lg transition-colors duration-200 transform hover:scale-105 mt-4"
+                  >
+                    Read More
+                  </button>
+
+                  {/* Admin-only Edit/Delete buttons */}
                   {isAdmin && (
                     <div className="flex space-x-2 mt-4">
                       <button
@@ -189,7 +212,7 @@ function Home() {
         </Slider>
       </div>
 
-      {/* ADD FORM (Admin only) */}
+      {/* ADD FORM (admin only) */}
       {isAdmin && showAddForm && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <form
@@ -244,7 +267,7 @@ function Home() {
         </div>
       )}
 
-      {/* EDIT FORM (Admin only) */}
+      {/* EDIT FORM (admin only) */}
       {isAdmin && showEditForm && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <form
@@ -300,13 +323,5 @@ function Home() {
     </div>
   );
 }
-
-
-
-
-
-  
-
-
 
 export default Home;
