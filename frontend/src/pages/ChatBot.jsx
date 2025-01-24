@@ -1,14 +1,24 @@
 import React, { useState } from 'react';
+import { useUser } from '@clerk/clerk-react';
 import axios from 'axios';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faGear } from '@fortawesome/free-solid-svg-icons';
 import ImageUploader from '../components/Home/ImageUploader';
 import MessageList from '../components/Home/MessageList';
 import TissueDescription from '../components/Home/TissueDescription';
 
 function ChatBot() {
+  const { user } = useUser();
+
+  const isAdmin = user?.publicMetadata?.role === 'admin';
+
   const [input, setInput] = useState("");
   const [messages, setMessages] = useState([]);
   const [image, setImage] = useState(null);
 
+  // -------------------------
+  // Handle Sending Messages
+  // -------------------------
   const handleSend = async () => {
     if (input.trim() || image) {
       const userMessage = { image, text: input };
@@ -18,16 +28,14 @@ function ChatBot() {
       if (image) {
         try {
           const predictionText = await predictImage(image);
-          const organType = predictionText.split(' ')[0].toLowerCase(); // Extract organ type
-
-          // Add prediction message
+          const organType = predictionText.split(' ')[0].toLowerCase(); 
+          
           const botMessage = {
             image: null,
             text: `Prediction: ${predictionText}`,
           };
           setMessages(prevMessages => [...prevMessages, botMessage]);
 
-          // Add educational content if it's a lung or kidney
           if (organType === 'lung' || organType === 'kidney') {
             const educationalMessage = {
               image: null,
@@ -49,6 +57,7 @@ function ChatBot() {
     }
   };
 
+  // -------------------------
   const handleImageChange = (e) => {
     const file = e.target.files[0];
     if (file) {
@@ -61,6 +70,7 @@ function ChatBot() {
     }
   };
 
+  // -------------------------
   const predictImage = async (imageUrl) => {
     try {
       const formData = new FormData();
@@ -68,6 +78,7 @@ function ChatBot() {
       const blob = await response.blob();
       formData.append('image', blob);
 
+      // POST to server
       const res = await axios.post('http://localhost:5000/predict', formData, {
         headers: { 'Content-Type': 'multipart/form-data' },
       });
@@ -79,13 +90,27 @@ function ChatBot() {
   };
 
   return (
-    <div className="flex flex-col h-screen bg-gray-900">
-      {/* Message List */}
+    <div className="flex flex-col h-screen bg-gray-900 relative">
+      
+      {/* ADMIN-ONLY SETTINGS ICON */}
+      {isAdmin && (
+        <div className="absolute top-4 right-4">
+          <button
+            type="button"
+            className="p-2 text-gray-400 hover:text-white"
+            onClick={() => {
+              alert('Admin settings placeholder');
+            }}
+          >
+            <FontAwesomeIcon icon={faGear} className="w-6 h-6" />
+          </button>
+        </div>
+      )}
+
       <div className="flex-1 overflow-y-auto p-4">
         <MessageList messages={messages} />
       </div>
 
-      {/* Input Area */}
       <div className="sticky bottom-0 w-full bg-gray-800 border-t border-gray-700 p-4">
         <ImageUploader
           onImageChange={handleImageChange}
