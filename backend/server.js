@@ -10,21 +10,19 @@ const Question = require('./quiz_questions_db');
 const User = require('./user_model');
 const mongoose = require('mongoose');
 
-
 const app = express();
 const PORT = 3000;
 
-// Model configuration
-const MODEL_CLASSES = ["Kidney", "Lung"];
-const MODEL_URL = path.resolve(__dirname, 'model');
+// Model configuration for Teachable Machine
+const MODEL_CLASSES = ["Lung", "Kidney"];
+const TEACHABLE_MACHINE_URL = 'https://teachablemachine.withgoogle.com/models/n_3HlXZM5/';
 let model;
 
-// Load the TensorFlow model
+// Load the Teachable Machine model
 const loadModel = async () => {
   try {
-    console.log('Loading model...');
-    const modelPath = `file://${path.resolve(__dirname, 'model/model.json')}`;
-    model = await tf.loadLayersModel(modelPath);
+    console.log('Loading Teachable Machine model...');
+    model = await tf.loadLayersModel(TEACHABLE_MACHINE_URL + 'model.json');
     console.log('Model loaded successfully.');
   } catch (error) {
     console.error('Error loading model:', error);
@@ -54,7 +52,7 @@ app.get('/api/questions', async (req, res) => {
   }
 });
 
-// Image Prediction Endpoint
+// Updated Image Prediction Endpoint for Teachable Machine
 app.post('/predict', upload.single('image'), async (req, res) => {
   if (!model) {
     return res.status(500).send({ error: 'Model not loaded' });
@@ -65,25 +63,21 @@ app.post('/predict', upload.single('image'), async (req, res) => {
   }
 
   try {
+    // Process image according to Teachable Machine's requirements
     const tensor = tf.tidy(() => {
       const decodedImage = tf.node.decodeImage(req.file.buffer);
-      console.log('Decoded Image:', decodedImage);
-      return decodedImage
-        .resizeBilinear([224, 224])
-        .toFloat()
-        .div(255.0)
-        .expandDims();
+      // Teachable Machine models typically expect 224x224 images
+      const resized = tf.image.resizeBilinear(decodedImage, [224, 224]);
+      // Normalize to [-1, 1]
+      const normalized = resized.toFloat().div(127.5).sub(1);
+      return normalized.expandDims();
     });
 
     const predictions = await model.predict(tensor).data();
     tensor.dispose();
-    console.log('Prepared Tensor:', tensor);
 
     const predictedIndex = Array.from(predictions).indexOf(Math.max(...predictions));
-    console.log('Predicted Index:', predictedIndex);
-
     const confidence = (predictions[predictedIndex] * 100).toFixed(2);
-    console.log('Raw predictions:', predictions);
 
     res.send({
       label: MODEL_CLASSES[predictedIndex],
@@ -95,35 +89,30 @@ app.post('/predict', upload.single('image'), async (req, res) => {
   }
 });
 
-// Endpoint to fetch all quizzes metadata
+// Other endpoints remain the same...
 app.get('/api/quizzes', async (req, res) => {
   try {
     const quizzes = await mongoose.connection.collection('quizzes').find().toArray();
-    res.json(quizzes); // Send metadata for all quizzes
+    res.json(quizzes);
   } catch (err) {
     console.error('Error fetching quizzes:', err);
     res.status(500).json({ message: 'Error fetching quizzes', error: err.message });
   }
 });
 
-// Dynamic endpoint to fetch quiz questions based on collectionName from /api/quizzes
 app.get('/api/quizzes/:collectionName', async (req, res) => {
   const { collectionName } = req.params;
-
   try {
-    // Fetch questions from the dynamic collectionName
     const questions = await mongoose.connection.collection(collectionName).find().toArray();
-    res.json(questions); // Send questions back to the frontend
+    res.json(questions);
   } catch (err) {
     console.error('Error fetching quiz questions:', err);
     res.status(500).json({ message: 'Error fetching quiz questions', error: err.message });
   }
 });
 
-// Fallback route if collection is not found
 app.get('/api/:collectionName', async (req, res) => {
   const { collectionName } = req.params;
-
   try {
     const questions = await mongoose.connection.collection(collectionName).find().toArray();
     if (!questions) {
@@ -135,8 +124,6 @@ app.get('/api/:collectionName', async (req, res) => {
     res.status(500).json({ message: 'Error fetching collection data', error: err.message });
   }
 });
-
-
 
 // Initialize server
 loadModel();

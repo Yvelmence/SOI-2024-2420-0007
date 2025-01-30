@@ -9,16 +9,11 @@ import TissueDescription from '../components/Home/TissueDescription';
 
 function ChatBot() {
   const { user } = useUser();
-
   const isAdmin = user?.publicMetadata?.role === 'admin';
-
   const [input, setInput] = useState("");
   const [messages, setMessages] = useState([]);
   const [image, setImage] = useState(null);
 
-  // -------------------------
-  // Handle Sending Messages
-  // -------------------------
   const handleSend = async () => {
     if (input.trim() || image) {
       const userMessage = { image, text: input };
@@ -28,7 +23,7 @@ function ChatBot() {
       if (image) {
         try {
           const predictionText = await predictImage(image);
-          const organType = predictionText.split(' ')[0].toLowerCase(); 
+          const organType = predictionText.split(' ')[0].toLowerCase();
           
           const botMessage = {
             image: null,
@@ -57,7 +52,6 @@ function ChatBot() {
     }
   };
 
-  // -------------------------
   const handleImageChange = (e) => {
     const file = e.target.files[0];
     if (file) {
@@ -70,7 +64,6 @@ function ChatBot() {
     }
   };
 
-  // -------------------------
   const predictImage = async (imageUrl) => {
     try {
       const formData = new FormData();
@@ -78,8 +71,7 @@ function ChatBot() {
       const blob = await response.blob();
       formData.append('image', blob);
 
-      // POST to server
-      const res = await axios.post('http://localhost:5000/predict', formData, {
+      const res = await axios.post('http://localhost:3000/predict', formData, {
         headers: { 'Content-Type': 'multipart/form-data' },
       });
 
@@ -91,8 +83,6 @@ function ChatBot() {
 
   return (
     <div className="flex flex-col h-screen bg-gray-900 relative">
-      
-      {/* ADMIN-ONLY SETTINGS ICON */}
       {isAdmin && (
         <div className="absolute top-4 right-4">
           <button
