@@ -1,28 +1,30 @@
-import React, { useState } from 'react'
-import { Link } from 'react-router-dom'
-import { SignedIn, SignedOut, UserButton } from '@clerk/clerk-react'
-import { FaBars, FaTimes } from 'react-icons/fa'
+import React, { useState } from 'react';
+import { Link } from 'react-router-dom';
+import { SignedIn, SignedOut, UserButton } from '@clerk/clerk-react';
+import { FaBars, FaTimes } from 'react-icons/fa';
 
 const NavLinks = () => (
   <>
     <SignedIn>
       <Link to="/chatbot" className="hover:underline">ChatBot</Link>
+      <Link to="/forum" className="hover:underline">Forum</Link>
       <Link to="/quizzes" className="hover:underline">Quiz</Link>
       <UserButton afterSignOutUrl="/" />
     </SignedIn>
     <SignedOut>
       <Link to="/login" className="hover:underline">Log In</Link>
       <Link to="/signup" className="hover:underline">Sign Up</Link>
+      <Link to="/forum" className="hover:underline">Forum</Link>
     </SignedOut>
   </>
-)
+);
 
 function Navbar() {
-  const [isMenuOpen, setIsMenuOpen] = useState(false)
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   const toggleMenu = () => {
-    setIsMenuOpen(!isMenuOpen)
-  }
+    setIsMenuOpen(!isMenuOpen);
+  };
 
   return (
     <nav className="bg-pink-500 text-white p-4 h-16">
@@ -49,7 +51,7 @@ function Navbar() {
         </div>
       </div>
     </nav>
-  )
+  );
 }
 
-export default Navbar
+export default Navbar;

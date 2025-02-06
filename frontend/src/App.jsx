@@ -8,28 +8,27 @@ import ChatBot from './pages/ChatBot';
 import Quiz from './pages/Quiz';
 import Home from './pages/Home';
 import QuizSelection from './components/Quiz/QuizSelection';
-
-// IMPORTANT: Import your tissue details page
 import TissueDetails from './pages/TissueDetails';
+
+// Import Forum pages
+import Forum from './pages/Forum';
+import ForumPost from './pages/ForumPost';
 
 function App() {
   return (
     <Router>
       <div className="h-screen overflow-hidden flex flex-col">
-        {/* Your site's Navbar */}
         <Navbar />
-
-        {/* Main content area */}
         <div className="flex-1 overflow-y-auto">
           <Routes>
             {/* Public Routes */}
             <Route path="/" element={<Home />} />
             <Route path="/chatbot" element={<ChatBot />} />
-
-            {/* A route for viewing details of a specific tissue */}
+            <Route path="/forum" element={<Forum />} />
+            <Route path="/forum/:id" element={<ForumPost />} />
             <Route path="/tissue/:name" element={<TissueDetails />} />
 
-            {/* Protected Routes (must be signed in) */}
+            {/* Protected Routes */}
             <Route
               path="/quizzes"
               element={
@@ -43,12 +42,9 @@ function App() {
                 </>
               }
             />
-            <Route
-              path="/quiz/:collectionName"
-              element={<Quiz />}
-            />
+            <Route path="/quiz/:collectionName" element={<Quiz />} />
 
-            {/* Auth / Sign-In / Sign-Up Routes */}
+            {/* Auth Routes */}
             <Route
               path="/login"
               element={
