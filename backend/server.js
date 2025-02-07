@@ -1,5 +1,4 @@
 // server.js
-
 const express = require('express');
 const tf = require('@tensorflow/tfjs-node');
 const multer = require('multer');
@@ -14,6 +13,9 @@ const mongoose = require('mongoose');
 
 const app = express();
 const PORT = 3000;
+
+app.use(express.json({limit: '50mb'}));
+app.use(express.urlencoded({limit: '50mb', extended: true}));
 
 // Model configuration for Teachable Machine
 const MODEL_CLASSES = ["Lung", "Kidney"];
@@ -171,14 +173,12 @@ app.get('/api/forum', async (req, res) => {
 
 // POST: Create a new forum post
 app.post('/api/forum', async (req, res) => {
-  // Log the received data for debugging
-  console.log("Received POST body:", req.body);
   const { title, content, imageUrl, userId } = req.body;
   const newPost = new ForumPost({ title, content, imageUrl, userId });
   try {
-    await newPost.save();
-    console.log("New post created:", newPost);
-    res.status(201).json(newPost);
+    const savedPost = await newPost.save();
+    console.log("Post saved to database:", savedPost);  // Add this line
+    res.status(201).json(savedPost);
   } catch (err) {
     console.error('Error creating forum post:', err);
     res.status(400).json({ message: 'Error creating forum post', error: err.message });
@@ -225,6 +225,12 @@ app.get('/api/forum/:id/comments', async (req, res) => {
   }
 });
 
+
+
+app.listen(PORT, () => {
+  console.log(`Server running on port ${PORT}`);
+});
+
 // POST: Add a comment to a specific forum post
 app.post('/api/forum/:id/comments', async (req, res) => {
   const { text, userId } = req.body;  // Optionally include userId for the comment
@@ -237,3 +243,37 @@ app.post('/api/forum/:id/comments', async (req, res) => {
     res.status(400).json({ message: 'Error adding comment', error: err.message });
   }
 });
+
+
+
+
+
+// GET: Retrieve a single forum post by ID
+app.get('/api/forum/:id', async (req, res) => {
+  try {
+    const post = await ForumPost.findById(req.params.id);
+    if (!post) {
+      return res.status(404).json({ message: 'Post not found' });
+    }
+    res.json(post);
+  } catch (err) {
+    console.error('Error fetching forum post:', err);
+    res.status(500).json({ message: 'Error fetching forum post', error: err.message });
+  }
+});
+
+
+app.get('/api/forum', async (req, res) => {
+  try {
+    const posts = await ForumPost.find({}).sort({ createdAt: -1 });
+    console.log("Total posts found:", posts.length);
+    console.log("Sample post:", posts[0]); // Log first post details
+    res.json(posts);
+  } catch (err) {
+    console.error('Error fetching forum posts:', err);
+    res.status(500).json({ message: 'Error fetching forum posts', error: err.message });
+  }
+});
+
+
+
