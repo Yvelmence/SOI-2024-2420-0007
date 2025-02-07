@@ -277,3 +277,72 @@ app.get('/api/forum', async (req, res) => {
 
 
 
+// PUT: Edit a comment
+app.put('/api/forum/comments/:commentId', async (req, res) => {
+  const { text, userId } = req.body;
+  try {
+    const comment = await ForumComment.findById(req.params.commentId);
+    
+    // Check if user owns the comment
+    if (comment.userId !== userId) {
+      return res.status(403).json({ message: 'Unauthorized' });
+    }
+
+    comment.text = text;
+    comment.updatedAt = new Date();
+    await comment.save();
+    
+    res.json(comment);
+  } catch (err) {
+    console.error('Error updating comment:', err);
+    res.status(500).json({ message: 'Error updating comment', error: err.message });
+  }
+});
+
+// DELETE: Delete a comment
+app.delete('/api/forum/comments/:commentId', async (req, res) => {
+  const { userId } = req.body;
+  try {
+    const comment = await ForumComment.findById(req.params.commentId);
+    
+    // Check if user owns the comment
+    if (comment.userId !== userId) {
+      return res.status(403).json({ message: 'Unauthorized' });
+    }
+
+    await ForumComment.findByIdAndDelete(req.params.commentId);
+    res.json({ message: 'Comment deleted successfully' });
+  } catch (err) {
+    console.error('Error deleting comment:', err);
+    res.status(500).json({ message: 'Error deleting comment', error: err.message });
+  }
+});
+
+
+
+
+
+
+// Admin-specific route to delete any comment
+app.delete('/api/forum/admin/comments/:commentId', async (req, res) => {
+  const { adminId } = req.body;
+  console.log('Admin Delete Request:', { adminId, commentId: req.params.commentId });
+
+  try {
+    // Temporary: just attempt to delete without admin check
+    const deletedComment = await ForumComment.findByIdAndDelete(req.params.commentId);
+    
+    if (!deletedComment) {
+      console.log('Comment not found');
+      return res.status(404).json({ message: 'Comment not found' });
+    }
+
+    console.log('Comment deleted successfully');
+    res.json({ message: 'Comment deleted successfully' });
+  } catch (err) {
+    console.error('Error deleting comment:', err);
+    res.status(500).json({ message: 'Error deleting comment', error: err.message });
+  }
+});
+
+

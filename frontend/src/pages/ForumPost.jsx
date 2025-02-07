@@ -8,6 +8,8 @@ function ForumPost() {
  const [post, setPost] = useState(null);
  const [comments, setComments] = useState([]);
  const [newComment, setNewComment] = useState("");
+ const [editingCommentId, setEditingCommentId] = useState(null);
+ const [editedCommentText, setEditedCommentText] = useState("");
 
  useEffect(() => {
    const fetchData = async () => {
@@ -53,6 +55,78 @@ function ForumPost() {
      const newCommentData = await response.json();
      setComments(prevComments => [newCommentData, ...prevComments]);
      setNewComment("");
+   } catch (error) {
+     console.error("Error:", error);
+   }
+ };
+
+ const handleEditComment = async () => {
+   if (!editedCommentText.trim()) return;
+
+   try {
+     const response = await fetch(`http://localhost:3000/api/forum/comments/${editingCommentId}`, {
+       method: 'PUT',
+       headers: {
+         'Content-Type': 'application/json',
+       },
+       body: JSON.stringify({
+         text: editedCommentText,
+         userId: user.id
+       }),
+     });
+
+     if (!response.ok) throw new Error('Failed to edit comment');
+     
+     setComments(prevComments => 
+       prevComments.map(comment => 
+         comment._id === editingCommentId 
+           ? { ...comment, text: editedCommentText } 
+           : comment
+       )
+     );
+     setEditingCommentId(null);
+     setEditedCommentText("");
+   } catch (error) {
+     console.error("Error:", error);
+   }
+ };
+
+ const handleDeleteComment = async (commentId) => {
+   try {
+     const response = await fetch(`http://localhost:3000/api/forum/comments/${commentId}`, {
+       method: 'DELETE',
+       headers: {
+         'Content-Type': 'application/json',
+       },
+       body: JSON.stringify({ userId: user.id })
+     });
+
+     if (!response.ok) throw new Error('Failed to delete comment');
+     
+     setComments(prevComments => prevComments.filter(comment => comment._id !== commentId));
+   } catch (error) {
+     console.error("Error:", error);
+   }
+ };
+
+ const handleAdminDeleteComment = async (commentId) => {
+   if (!user || user.publicMetadata?.role !== 'admin') {
+     alert('Admin access required');
+     return;
+   }
+
+   try {
+     const response = await fetch(`http://localhost:3000/api/forum/admin/comments/${commentId}`, {
+       method: 'DELETE',
+       headers: {
+         'Content-Type': 'application/json',
+       },
+       body: JSON.stringify({ adminId: user.id })
+     });
+
+     if (!response.ok) throw new Error('Failed to delete comment');
+     
+     setComments(prevComments => prevComments.filter(comment => comment._id !== commentId));
    } catch (error) {
      console.error("Error:", error);
    }
@@ -112,7 +186,65 @@ function ForumPost() {
                  {new Date(comment.createdAt).toLocaleString()}
                </span>
              </div>
-             <p className="text-gray-100">{comment.text}</p>
+             
+             {editingCommentId === comment._id ? (
+               <div>
+                 <textarea
+                   className="w-full p-2 bg-gray-700 rounded-lg mb-2"
+                   value={editedCommentText}
+                   onChange={(e) => setEditedCommentText(e.target.value)}
+                   rows="3"
+                 />
+                 <div className="flex space-x-2">
+                   <button
+                     onClick={handleEditComment}
+                     className="bg-green-500 hover:bg-green-600 px-4 py-2 rounded-lg w-full"
+                   >
+                     Save
+                   </button>
+                   <button
+                     onClick={() => {
+                       setEditingCommentId(null);
+                       setEditedCommentText("");
+                     }}
+                     className="bg-gray-500 hover:bg-gray-600 px-4 py-2 rounded-lg w-full"
+                   >
+                     Cancel
+                   </button>
+                 </div>
+               </div>
+             ) : (
+               <div className="flex justify-between items-center">
+                 <p className="text-gray-100 flex-grow">{comment.text}</p>
+                 {user && (
+                   <div className="flex space-x-2 ml-2">
+                     {(user.id === comment.userId || user.publicMetadata?.role === 'admin') && (
+                       <button
+                         onClick={() => 
+                           user.publicMetadata?.role === 'admin' 
+                             ? handleAdminDeleteComment(comment._id) 
+                             : handleDeleteComment(comment._id)
+                         }
+                         className="bg-red-500 hover:bg-red-600 px-2 py-1 rounded-lg text-sm"
+                       >
+                         Delete
+                       </button>
+                     )}
+                     {user.id === comment.userId && (
+                       <button
+                         onClick={() => {
+                           setEditingCommentId(comment._id);
+                           setEditedCommentText(comment.text);
+                         }}
+                         className="bg-blue-500 hover:bg-blue-600 px-2 py-1 rounded-lg text-sm"
+                       >
+                         Edit
+                       </button>
+                     )}
+                   </div>
+                 )}
+               </div>
+             )}
            </div>
          ))}
        </div>
