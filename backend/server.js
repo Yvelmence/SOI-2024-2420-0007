@@ -33,9 +33,6 @@ const loadModel = async () => {
   }
 };
 
-// Load the Teachable Machine model when the server starts
-loadModel();
-
 // Middleware
 app.use(cors());
 app.use(express.json());
@@ -323,6 +320,9 @@ app.delete('/api/forum/comments/:commentId', async (req, res) => {
 
 
 
+
+
+
 // Admin-specific route to delete any comment
 app.delete('/api/forum/admin/comments/:commentId', async (req, res) => {
   const { adminId } = req.body;
@@ -347,4 +347,70 @@ app.delete('/api/forum/admin/comments/:commentId', async (req, res) => {
 
 
 
+// Add these endpoints to server.js
 
+// PUT: Update a forum post with user verification
+app.put('/api/forum/:id', async (req, res) => {
+  const { title, content, imageUrl, userId } = req.body;
+  try {
+    const post = await ForumPost.findById(req.params.id);
+    
+    // Check if user owns the post
+    if (post.userId !== userId) {
+      return res.status(403).json({ message: 'Unauthorized' });
+    }
+
+    // Update the forum post
+    const updatedPost = await ForumPost.findByIdAndUpdate(
+      req.params.id,
+      { 
+        title, 
+        content, 
+        imageUrl, 
+        updatedAt: new Date() 
+      },
+      { new: true }
+    );
+    res.json(updatedPost);
+  } catch (err) {
+    console.error('Error updating forum post:', err);
+    res.status(400).json({ message: 'Error updating forum post', error: err.message });
+  }
+});
+
+// DELETE: Delete a forum post with user verification
+app.delete('/api/forum/:id', async (req, res) => {
+  const { userId } = req.body;
+  try {
+    const post = await ForumPost.findById(req.params.id);
+    
+    // Check if user owns the post
+    if (post.userId !== userId) {
+      return res.status(403).json({ message: 'Unauthorized' });
+    }
+
+    await ForumPost.findByIdAndDelete(req.params.id);
+    // Also delete all comments associated with this post
+    await ForumComment.deleteMany({ postId: req.params.id });
+    
+    res.json({ message: "Forum post and associated comments deleted successfully" });
+  } catch (err) {
+    console.error('Error deleting forum post:', err);
+    res.status(500).json({ message: 'Error deleting forum post', error: err.message });
+  }
+});
+
+// Admin route to delete any post
+app.delete('/api/forum/admin/:id', async (req, res) => {
+  const { adminId } = req.body;
+  try {
+    // Delete the post and its comments
+    await ForumPost.findByIdAndDelete(req.params.id);
+    await ForumComment.deleteMany({ postId: req.params.id });
+    
+    res.json({ message: "Forum post and associated comments deleted successfully" });
+  } catch (err) {
+    console.error('Error deleting forum post:', err);
+    res.status(500).json({ message: 'Error deleting forum post', error: err.message });
+  }
+});
