@@ -10,6 +10,8 @@ const connectDB = require('./db');
 const Question = require('./quiz_questions_db');
 const User = require('./user_model');
 const mongoose = require('mongoose');
+const TissueList = require('./models/TissueList') ;
+const Tissue = require('./models/TissueDetails') ;
 
 const app = express();
 const PORT = 3000;
@@ -459,6 +461,31 @@ app.get('/api/:collectionName', async (req, res) => {
   } catch (err) {
     console.error(`Error fetching data from collection ${collectionName}:`, err);
     res.status(500).json({ message: 'Error fetching collection data', error: err.message });
+  }
+});
+
+//For tissuelist
+// Fetching all tissue list data
+app.get('/api/tissuelist', async (req, res) => {
+  try {
+    const tissues = await TissueList.find(); // Mongoose query to find all documents
+    console.log('Fetched Data:', tissues); // Log fetched data for debugging
+    res.json(tissues); // Return the data in JSON format
+  } catch (error) {
+    console.error('Error fetching tissues:', error);
+    res.status(500).json({ error: 'Internal Server Error' });
+  }
+});
+
+//For tissue
+// Fetching tissue details by organ name
+app.get('/api/tissues/:name', async (req, res) => {
+  try {
+    const tissue = await Tissue.findOne({ organ: req.params.name }); // Use `organ` instead of `name`
+    if (!tissue) return res.status(404).json({ message: 'Tissue not found' });
+    res.json(tissue); // Return the tissue details
+  } catch (error) {
+    res.status(500).json({ message: 'Error fetching tissue data' });
   }
 });
 

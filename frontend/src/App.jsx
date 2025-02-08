@@ -9,8 +9,8 @@ import Quiz from './pages/Quiz';
 import Home from './pages/Home';
 import QuizSelection from './components/Quiz/QuizSelection';
 import TissueDetails from './pages/TissueDetails';
-
-// Import Forum pages
+import TissueList from './pages/TissueList';
+import Information from './pages/Information';
 import Forum from './pages/Forum';
 import ForumPost from './pages/ForumPost';
 
@@ -27,6 +27,8 @@ function App() {
             <Route path="/forum" element={<Forum />} />
             <Route path="/forum/:id" element={<ForumPost />} />
             <Route path="/tissue/:name" element={<TissueDetails />} />
+            <Route path="/tissuelist" element={<TissueList />} />
+            <Route path="/information/:name" element={<Information />} />
 
             {/* Protected Routes */}
             <Route
@@ -44,9 +46,9 @@ function App() {
             />
             <Route path="/quiz/:collectionName" element={<Quiz />} />
 
-            {/* Auth Routes */}
+            {/* Auth Routes - Updated with catch-all patterns */}
             <Route
-              path="/login"
+              path="/login/*"
               element={
                 <div
                   className="relative flex items-center justify-center min-h-screen bg-cover bg-center bg-no-repeat"
@@ -62,7 +64,7 @@ function App() {
               }
             />
             <Route
-              path="/signup"
+              path="/signup/*"
               element={
                 <div
                   className="relative flex items-center justify-center min-h-screen bg-cover bg-center bg-no-repeat"
