@@ -1,7 +1,14 @@
-// Forum.jsx
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useUser } from '@clerk/clerk-react';
+
+const isValidFileType = (file) => {
+  const validImageTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
+  const validVideoTypes = ['video/mp4', 'video/webm', 'video/ogg'];
+  return [...validImageTypes, ...validVideoTypes].includes(file.type);
+};
+
+const MAX_FILE_SIZE = 50 * 1024 * 1024; // 50MB max file size
 
 function Forum() {
   const { user } = useUser();
@@ -9,7 +16,7 @@ function Forum() {
   const [posts, setPosts] = useState([]);
   const [newTitle, setNewTitle] = useState("");
   const [newContent, setNewContent] = useState("");
-  const [newImage, setNewImage] = useState(null);
+  const [newFile, setNewFile] = useState(null);
 
   useEffect(() => {
     const fetchPosts = async () => {
@@ -25,12 +32,27 @@ function Forum() {
     fetchPosts();
   }, []);
 
-  const handleImageUpload = (e) => {
+  const handleFileUpload = (e) => {
     const file = e.target.files[0];
     if (!file) return;
+
+    // Check file type
+    if (!isValidFileType(file)) {
+      alert('Please upload only images (JPEG, PNG, GIF, WEBP) or videos (MP4, WEBM, OGG)');
+      e.target.value = ''; // Reset input
+      return;
+    }
+
+    // Check file size
+    if (file.size > MAX_FILE_SIZE) {
+      alert('File size must be less than 50MB');
+      e.target.value = ''; // Reset input
+      return;
+    }
+
     const reader = new FileReader();
     reader.onloadend = () => {
-      setNewImage(reader.result);
+      setNewFile(reader.result);
     };
     reader.readAsDataURL(file);
   };
@@ -48,7 +70,7 @@ function Forum() {
     const payload = {
       title: newTitle,
       content: newContent,
-      imageUrl: newImage,
+      imageUrl: newFile,
       userId: user.id,
       userName: user.fullName || user.username,
       createdAt: new Date()
@@ -67,7 +89,7 @@ function Forum() {
       setPosts([newPostData, ...posts]);
       setNewTitle("");
       setNewContent("");
-      setNewImage(null);
+      setNewFile(null);
     } catch (error) {
       console.error("Error adding post:", error.message);
       alert("Error adding post: " + error.message);
@@ -96,16 +118,26 @@ function Forum() {
           />
           <input 
             type="file" 
-            accept="image/*" 
-            onChange={handleImageUpload}
+            accept="image/*, video/*" 
+            onChange={handleFileUpload}
             className="text-white" 
           />
-          {newImage && (
-            <img
-              src={newImage}
-              alt="Preview"
-              className="mt-2 h-40 object-cover rounded-lg"
-            />
+          {newFile && (
+            <div className="mt-2">
+              {newFile.startsWith('data:image/') ? (
+                <img
+                  src={newFile}
+                  alt="Preview"
+                  className="mt-2 h-40 object-cover rounded-lg"
+                />
+              ) : (
+                <video
+                  src={newFile}
+                  controls
+                  className="mt-2 h-40 w-full rounded-lg"
+                />
+              )}
+            </div>
           )}
           <button
             onClick={handleAddPost}
@@ -130,15 +162,25 @@ function Forum() {
             </p>
             <p className="mt-2">{post.content}</p>
             {post.imageUrl && (
-              <img 
-                src={post.imageUrl} 
-                alt={post.title}
-                className="mt-2 h-40 object-cover rounded-lg" 
-              />
+              <div className="mt-2">
+                {post.imageUrl.startsWith('data:image/') ? (
+                  <img 
+                    src={post.imageUrl} 
+                    alt={post.title}
+                    className="mt-2 h-40 object-cover rounded-lg" 
+                  />
+                ) : post.imageUrl.startsWith('data:video/') ? (
+                  <video
+                    src={post.imageUrl}
+                    controls
+                    className="mt-2 h-40 w-full rounded-lg"
+                  />
+                ) : null}
+              </div>
             )}
             <button
               onClick={() => navigate(`/forum/${post._id}`)}
-              className="mt-4 bg-blue-500 hover:bg-blue-600 px-4 py-2 rounded-lg w-full"
+              className="mt-2 bg-blue-500 hover:bg-blue-600 px-4 py-2 rounded-lg w-full"
             >
               View Post
             </button>
