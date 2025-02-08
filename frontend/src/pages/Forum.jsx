@@ -38,7 +38,7 @@ function Forum() {
 
     // Check file type
     if (!isValidFileType(file)) {
-      alert('Please upload only images (JPEG, PNG, GIF, WEBP) or videos (MP4, WEBM, OGG)');
+      alert('Please upload only images (JPEG, PNG) or videos (MP4)');
       e.target.value = ''; // Reset input
       return;
     }

@@ -326,8 +326,8 @@ function Home() {
       <div className="max-w-7xl w-full">
         <Slider {...settings}>
           {sliderData.map((item, index) => (
-            <div key={index} className="px-4 h-[500px]">
-              <div className="bg-gray-800 rounded-xl overflow-hidden shadow-xl h-full flex flex-col transform transition-transform duration-300 hover:scale-105">
+            <div key={index} className="px-4">  {/* Remove fixed height here */}
+              <div className="bg-gray-800 rounded-xl overflow-hidden shadow-xl h-[600px] flex flex-col transform transition-transform duration-300 hover:scale-105"> {/* Fixed height for uniformity */}
                 <div className="w-full h-56 flex-shrink-0">
                   <img
                     src={item.img}
@@ -336,38 +336,40 @@ function Home() {
                   />
                 </div>
                 <div className="p-6 flex flex-col flex-grow">
-                  <h2 className="text-2xl font-bold text-white mb-4">
+                  <h2 className="text-2xl font-bold text-white mb-4 break-words">
                     {item.name}
                   </h2>
-                  <p className="text-gray-300 text-sm leading-relaxed flex-grow">
+                  <p className="text-gray-300 text-sm leading-relaxed flex-grow overflow-auto break-words">
                     {item.info}
                   </p>
 
-                  {/* READ MORE BUTTON */}
-                  <button
-                    onClick={() => handleReadMore(item.name)}
-                    className="w-full bg-pink-500 hover:bg-pink-600 text-white font-semibold py-3 px-6 rounded-lg transition-colors duration-200 transform hover:scale-105 mt-4"
-                  >
-                    Read More
-                  </button>
+                  <div className="mt-auto"> {/* Button container to push buttons to bottom */}
+                    {/* READ MORE BUTTON */}
+                    <button
+                      onClick={() => handleReadMore(item.name)}
+                      className="w-full bg-pink-500 hover:bg-pink-600 text-white font-semibold py-2 px-4 rounded-lg transition-colors duration-200 transform hover:scale-105 mb-2"
+                    >
+                      Read More
+                    </button>
 
-                  {/* Admin-only Edit/Delete Buttons */}
-                  {isAdmin && (
-                    <div className="flex space-x-2 mt-4">
-                      <button
-                        onClick={() => handleEditClick(index)}
-                        className="bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 px-4 rounded-lg transition"
-                      >
-                        Edit
-                      </button>
-                      <button
-                        onClick={() => handleDeleteItem(index)}
-                        className="bg-red-500 hover:bg-red-600 text-white font-semibold py-2 px-4 rounded-lg transition"
-                      >
-                        Delete
-                      </button>
-                    </div>
-                  )}
+                    {/* Admin-only Edit/Delete Buttons */}
+                    {isAdmin && (
+                      <div className="grid grid-cols-2 gap-2"> {/* Changed to grid for better spacing */}
+                        <button
+                          onClick={() => handleEditClick(index)}
+                          className="bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 px-2 rounded-lg transition text-sm"
+                        >
+                          Edit
+                        </button>
+                        <button
+                          onClick={() => handleDeleteItem(index)}
+                          className="bg-red-500 hover:bg-red-600 text-white font-semibold py-2 px-2 rounded-lg transition text-sm"
+                        >
+                          Delete
+                        </button>
+                      </div>
+                    )}
+                  </div>
                 </div>
               </div>
             </div>

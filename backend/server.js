@@ -236,7 +236,13 @@ app.listen(PORT, () => {
 
 // POST: Add a comment to a specific forum post
 app.post('/api/forum/:id/comments', async (req, res) => {
-  const { text, userId } = req.body;  // Optionally include userId for the comment
+  const { text, userId } = req.body;
+
+  // Add empty comment validation
+  if (!text || !text.trim()) {
+    return res.status(400).json({ message: 'Comment cannot be empty' });
+  }
+
   const newComment = new ForumComment({ postId: req.params.id, text, userId });
   try {
     await newComment.save();
@@ -246,7 +252,6 @@ app.post('/api/forum/:id/comments', async (req, res) => {
     res.status(400).json({ message: 'Error adding comment', error: err.message });
   }
 });
-
 
 
 
@@ -283,6 +288,11 @@ app.get('/api/forum', async (req, res) => {
 // PUT: Edit a comment
 app.put('/api/forum/comments/:commentId', async (req, res) => {
   const { text, userId } = req.body;
+  
+  if (!text || !text.trim()) {
+    return res.status(400).json({ message: 'Comment cannot be empty' });
+  }
+
   try {
     const comment = await ForumComment.findById(req.params.commentId);
     
@@ -301,6 +311,29 @@ app.put('/api/forum/comments/:commentId', async (req, res) => {
     res.status(500).json({ message: 'Error updating comment', error: err.message });
   }
 });
+
+// Admin route to delete any post - Place this BEFORE the regular delete route
+app.delete('/api/forum/admin/:id', async (req, res) => {
+  const { adminId } = req.body;
+  try {
+    const post = await ForumPost.findById(req.params.id);
+    
+    if (!post) {
+      return res.status(404).json({ message: 'Post not found' });
+    }
+
+    // Delete associated comments
+    await ForumComment.deleteMany({ postId: req.params.id });
+    // Delete the post
+    await ForumPost.findByIdAndDelete(req.params.id);
+    
+    res.json({ message: "Forum post and comments deleted successfully" });
+  } catch (err) {
+    console.error('Error deleting forum post:', err);
+    res.status(500).json({ message: 'Error deleting forum post', error: err.message });
+  }
+});
+
 
 // DELETE: Delete a comment
 app.delete('/api/forum/comments/:commentId', async (req, res) => {
@@ -428,6 +461,7 @@ app.get('/api/:collectionName', async (req, res) => {
     res.status(500).json({ message: 'Error fetching collection data', error: err.message });
   }
 });
+
 
 
 
