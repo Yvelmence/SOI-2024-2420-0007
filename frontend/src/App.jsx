@@ -11,8 +11,6 @@ import QuizSelection from './components/Quiz/QuizSelection';
 import TissueDetails from './pages/TissueDetails';
 import TissueList from './pages/TissueList';
 import Information from './pages/Information';
-
-// Import Forum pages
 import Forum from './pages/Forum';
 import ForumPost from './pages/ForumPost';
 
@@ -30,8 +28,6 @@ function App() {
             <Route path="/forum/:id" element={<ForumPost />} />
             <Route path="/tissue/:name" element={<TissueDetails />} />
             <Route path="/tissuelist" element={<TissueList />} />
-            
-            {/* Add dynamic route for Information page */}
             <Route path="/information/:name" element={<Information />} />
 
             {/* Protected Routes */}
@@ -50,9 +46,9 @@ function App() {
             />
             <Route path="/quiz/:collectionName" element={<Quiz />} />
 
-            {/* Auth Routes */}
+            {/* Auth Routes - Updated with catch-all patterns */}
             <Route
-              path="/login"
+              path="/login/*"
               element={
                 <div
                   className="relative flex items-center justify-center min-h-screen bg-cover bg-center bg-no-repeat"
@@ -68,7 +64,7 @@ function App() {
               }
             />
             <Route
-              path="/signup"
+              path="/signup/*"
               element={
                 <div
                   className="relative flex items-center justify-center min-h-screen bg-cover bg-center bg-no-repeat"
