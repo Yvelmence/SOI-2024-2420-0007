@@ -9,6 +9,8 @@ import Quiz from './pages/Quiz';
 import Home from './pages/Home';
 import QuizSelection from './components/Quiz/QuizSelection';
 import TissueDetails from './pages/TissueDetails';
+import TissueList from './pages/TissueList';
+import Information from './pages/Information';
 
 // Import Forum pages
 import Forum from './pages/Forum';
@@ -27,6 +29,10 @@ function App() {
             <Route path="/forum" element={<Forum />} />
             <Route path="/forum/:id" element={<ForumPost />} />
             <Route path="/tissue/:name" element={<TissueDetails />} />
+            <Route path="/tissuelist" element={<TissueList />} />
+            
+            {/* Add dynamic route for Information page */}
+            <Route path="/information/:name" element={<Information />} />
 
             {/* Protected Routes */}
             <Route
