@@ -33,6 +33,9 @@ const loadModel = async () => {
   }
 };
 
+// Load the Teachable Machine model when the server starts
+loadModel();
+
 // Middleware
 app.use(cors());
 app.use(express.json());
@@ -320,9 +323,6 @@ app.delete('/api/forum/comments/:commentId', async (req, res) => {
 
 
 
-
-
-
 // Admin-specific route to delete any comment
 app.delete('/api/forum/admin/comments/:commentId', async (req, res) => {
   const { adminId } = req.body;
@@ -344,5 +344,7 @@ app.delete('/api/forum/admin/comments/:commentId', async (req, res) => {
     res.status(500).json({ message: 'Error deleting comment', error: err.message });
   }
 });
+
+
 
 

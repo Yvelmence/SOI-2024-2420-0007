@@ -77,7 +77,7 @@ function ChatBot() {
 
       return `${res.data.label} (${res.data.confidence} confidence)`;
     } catch (error) {
-      throw new Error("Failed to get prediction from the server");
+      throw new Error("Failed to get prediction from the server", error);
     }
   };
 
