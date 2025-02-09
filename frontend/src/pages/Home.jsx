@@ -8,72 +8,153 @@ import "slick-carousel/slick/slick-theme.css";
 function Home() {
   const navigate = useNavigate();
   const { user } = useUser();
+  const [sliderData, setSliderData] = useState([]);
+  const [loading, setLoading] = useState(true);
 
   // Check if user is admin
   const isAdmin = user?.publicMetadata?.role === 'admin';
 
-  // -------------------------
-  // Load from localStorage OR use the provided dataset
-  // -------------------------
-  const [sliderData, setSliderData] = useState(() => {
-    const storedTissues = localStorage.getItem("tissues");
-    return storedTissues
-      ? JSON.parse(storedTissues)
-      : [
-          {
-            name: "Kidney",
-            img: "./images/cardImages/kidney x100 H&E 75.jpg",
-            info: "Without your kidney, your body would be filled with waste. Let's see what it looks like under the microscope!"
-          },
-          {
-            name: "Lung",
-            img: "./images/cardImages/kidney x100 H&E 76.jpg",
-            info: "Lungs are essential for gaseous exchange. Ever wonder how it looks under a microscope?"
-          },
-          {
-            name: "Liver",
-            img: "./images/cardImages/kidney x100 H&E 77.jpg",
-            info: "The liver is one of the largest organs in the body. Click here to find out more!"
-          },
-          {
-            name: "Testes",
-            img: "./images/cardImages/kidney x100 H&E 78.jpg",
-            info: "Testes are vital in sperm production. Learn about their microscopic structure here!"
-          },
-          {
-            name: "Small Intestine",
-            img: "./images/cardImages/kidney x100 H&E 79.jpg",
-            info: "The small intestine helps with nutrient absorption. Read more to discover its unique folds!"
-          }
-        ];
-  });
-
-  // -------------------------
-  // Persist to localStorage if sliderData changes
-  // -------------------------
-  useEffect(() => {
-    localStorage.setItem("tissues", JSON.stringify(sliderData));
-  }, [sliderData]);
-
-  // -------------------------
-  // Admin-only form states
-  // -------------------------
+  // Form states
   const [showAddForm, setShowAddForm] = useState(false);
   const [showEditForm, setShowEditForm] = useState(false);
   const [editIndex, setEditIndex] = useState(null);
-
-  // -------------------------
-  // Form data
-  // -------------------------
   const [formData, setFormData] = useState({
     name: "",
     img: "",
     info: ""
   });
 
-  // -------------------------
+  // Fetch tissues data from the database
+  useEffect(() => {
+    const fetchTissues = async () => {
+      try {
+        const response = await fetch("http://localhost:3000/api/tissues");
+        if (!response.ok) throw new Error("Failed to fetch tissues");
+        const data = await response.json();
+        setSliderData(data);
+      } catch (error) {
+        console.error("Error fetching tissues:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchTissues();
+  }, []);
+
+  // Handle file upload
+  const handleFileUpload = (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      setFormData(prev => ({ ...formData, img: reader.result }));
+    };
+    reader.readAsDataURL(file);
+  };
+
+  // Add new tissue
+  const handleAddItem = async (e) => {
+    e.preventDefault();
+    if (!formData.name.trim() || !formData.info.trim() || !formData.img) {
+      alert("All fields are required.");
+      return;
+    }
+
+    try {
+      const response = await fetch("http://localhost:3000/api/tissues", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          name: formData.name,
+          img: formData.img,
+          info: formData.info,
+          userId: user.id
+        }),
+      });
+
+      if (!response.ok) throw new Error("Failed to add tissue");
+      const newTissue = await response.json();
+      setSliderData([...sliderData, newTissue]);
+      setFormData({ name: "", img: "", info: "" });
+      setShowAddForm(false);
+    } catch (error) {
+      console.error("Error adding tissue:", error);
+      alert("Error adding tissue: " + error.message);
+    }
+  };
+
+  // Edit tissue
+  const handleEditClick = (index) => {
+    setEditIndex(index);
+    setFormData(sliderData[index]);
+    setShowEditForm(true);
+  };
+
+  const handleUpdateItem = async (e) => {
+    e.preventDefault();
+    if (!formData.name.trim() || !formData.info.trim()) {
+      alert("Name and info are required.");
+      return;
+    }
+
+    try {
+      const tissueId = sliderData[editIndex]._id;
+      const response = await fetch(`http://localhost:3000/api/tissues/${tissueId}`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          name: formData.name,
+          img: formData.img,
+          info: formData.info,
+          userId: user.id
+        }),
+      });
+
+      if (!response.ok) throw new Error("Failed to update tissue");
+      const updatedTissue = await response.json();
+      
+      setSliderData(sliderData.map((item, i) =>
+        i === editIndex ? updatedTissue : item
+      ));
+      setFormData({ name: "", img: "", info: "" });
+      setEditIndex(null);
+      setShowEditForm(false);
+    } catch (error) {
+      console.error("Error updating tissue:", error);
+      alert("Error updating tissue: " + error.message);
+    }
+  };
+
+  // Delete tissue
+  const handleDeleteItem = async (index) => {
+    if (!window.confirm("Are you sure you want to delete this tissue?")) {
+      return;
+    }
+
+    try {
+      const tissueId = sliderData[index]._id;
+      const response = await fetch(`http://localhost:3000/api/tissues/${tissueId}`, {
+        method: "DELETE",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ userId: user.id })
+      });
+
+      if (!response.ok) throw new Error("Failed to delete tissue");
+      setSliderData(sliderData.filter((_, i) => i !== index));
+    } catch (error) {
+      console.error("Error deleting tissue:", error);
+      alert("Error deleting tissue: " + error.message);
+    }
+  };
+
   // Slider settings
-  // -------------------------
   const settings = {
     dots: true,
     infinite: false,
@@ -110,65 +191,6 @@ function Home() {
     ]
   };
 
-  // Helper: update localStorage & state
-  const saveToLocalStorage = (data) => {
-    localStorage.setItem("tissues", JSON.stringify(data));
-    setSliderData(data);
-  };
-
-  // -------------------------
-  // ADD ITEM (Admin)
-  // -------------------------
-  const handleAddItem = (e) => {
-    e.preventDefault();
-    // Prevent adding empty fields
-    if (!formData.name.trim() || !formData.img.trim() || !formData.info.trim()) {
-      return;
-    }
-    const updatedData = [...sliderData, formData];
-    saveToLocalStorage(updatedData);
-
-    // Reset form and hide
-    setFormData({ name: "", img: "", info: "" });
-    setShowAddForm(false);
-  };
-
-  // -------------------------
-  // EDIT ITEM (Admin)
-  // -------------------------
-  const handleEditClick = (index) => {
-    setEditIndex(index);
-    setFormData(sliderData[index]);
-    setShowEditForm(true);
-  };
-
-  const handleUpdateItem = (e) => {
-    e.preventDefault();
-    if (!formData.name.trim() || !formData.img.trim() || !formData.info.trim()) {
-      return;
-    }
-    const updatedData = sliderData.map((item, i) =>
-      i === editIndex ? formData : item
-    );
-    saveToLocalStorage(updatedData);
-
-    // Reset form and hide
-    setFormData({ name: "", img: "", info: "" });
-    setEditIndex(null);
-    setShowEditForm(false);
-  };
-
-  // -------------------------
-  // DELETE ITEM (Admin)
-  // -------------------------
-  const handleDeleteItem = (index) => {
-    const updatedData = sliderData.filter((_, i) => i !== index);
-    saveToLocalStorage(updatedData);
-  };
-
-  // -------------------------
-  // CANCEL FORM
-  // -------------------------
   const handleCancel = () => {
     setFormData({ name: "", img: "", info: "" });
     setShowAddForm(false);
@@ -176,12 +198,17 @@ function Home() {
     setEditIndex(null);
   };
 
-  // -------------------------
-  // Navigate to /tissue/:name
-  // -------------------------
   const handleReadMore = (itemName) => {
     navigate(`/tissue/${itemName.toLowerCase()}`);
   };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gray-900 flex items-center justify-center">
+        <div className="text-white text-xl">Loading...</div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gray-900 p-8 flex flex-col items-center justify-center relative">
@@ -189,7 +216,7 @@ function Home() {
         Learn about Tissues here!
       </h1>
 
-      {/* Admin-only: "Add" button */}
+      {/* Admin Controls */}
       {isAdmin && (
         <button
           onClick={() => setShowAddForm(true)}
@@ -199,9 +226,7 @@ function Home() {
         </button>
       )}
 
-      {/* -------------------------
-        ADD FORM (only if showAddForm=true)
-      ------------------------- */}
+      {/* Add Form */}
       {isAdmin && showAddForm && (
         <form
           onSubmit={handleAddItem}
@@ -214,32 +239,32 @@ function Home() {
               type="text"
               className="w-full px-3 py-2 rounded"
               value={formData.name}
-              onChange={(e) =>
-                setFormData({ ...formData, name: e.target.value })
-              }
+              onChange={(e) => setFormData({ ...formData, name: e.target.value })}
               placeholder="E.g. Heart"
             />
           </div>
           <div className="mb-4">
-            <label className="block text-white mb-2">Image URL</label>
+            <label className="block text-white mb-2">Image</label>
             <input
-              type="text"
-              className="w-full px-3 py-2 rounded"
-              value={formData.img}
-              onChange={(e) =>
-                setFormData({ ...formData, img: e.target.value })
-              }
-              placeholder="E.g. ./images/cardImages/heart.jpg"
+              type="file"
+              accept="image/*"
+              onChange={handleFileUpload}
+              className="w-full px-3 py-2 rounded text-white"
             />
+            {formData.img && (
+              <img
+                src={formData.img}
+                alt="Preview"
+                className="mt-2 max-h-40 object-contain"
+              />
+            )}
           </div>
           <div className="mb-4">
             <label className="block text-white mb-2">Info</label>
             <textarea
               className="w-full px-3 py-2 rounded"
               value={formData.info}
-              onChange={(e) =>
-                setFormData({ ...formData, info: e.target.value })
-              }
+              onChange={(e) => setFormData({ ...formData, info: e.target.value })}
               placeholder="Enter tissue description"
             />
           </div>
@@ -261,9 +286,7 @@ function Home() {
         </form>
       )}
 
-      {/* -------------------------
-        EDIT FORM (only if showEditForm=true)
-      ------------------------- */}
+      {/* Edit Form */}
       {isAdmin && showEditForm && (
         <form
           onSubmit={handleUpdateItem}
@@ -276,30 +299,31 @@ function Home() {
               type="text"
               className="w-full px-3 py-2 rounded"
               value={formData.name}
-              onChange={(e) =>
-                setFormData({ ...formData, name: e.target.value })
-              }
+              onChange={(e) => setFormData({ ...formData, name: e.target.value })}
             />
           </div>
           <div className="mb-4">
-            <label className="block text-white mb-2">Image URL</label>
+            <label className="block text-white mb-2">Image</label>
             <input
-              type="text"
-              className="w-full px-3 py-2 rounded"
-              value={formData.img}
-              onChange={(e) =>
-                setFormData({ ...formData, img: e.target.value })
-              }
+              type="file"
+              accept="image/*"
+              onChange={handleFileUpload}
+              className="w-full px-3 py-2 rounded text-white"
             />
+            {formData.img && (
+              <img
+                src={formData.img}
+                alt="Preview"
+                className="mt-2 max-h-40 object-contain"
+              />
+            )}
           </div>
           <div className="mb-4">
             <label className="block text-white mb-2">Info</label>
             <textarea
               className="w-full px-3 py-2 rounded"
               value={formData.info}
-              onChange={(e) =>
-                setFormData({ ...formData, info: e.target.value })
-              }
+              onChange={(e) => setFormData({ ...formData, info: e.target.value })}
             />
           </div>
           <div className="flex justify-end space-x-2">
@@ -320,61 +344,68 @@ function Home() {
         </form>
       )}
 
-      {/* -------------------------
-        Tissue Slider
-      ------------------------- */}
+      {/* Tissue Slider or Empty State */}
       <div className="max-w-7xl w-full">
-        <Slider {...settings}>
-          {sliderData.map((item, index) => (
-            <div key={index} className="px-4">  {/* Remove fixed height here */}
-              <div className="bg-gray-800 rounded-xl overflow-hidden shadow-xl h-[600px] flex flex-col transform transition-transform duration-300 hover:scale-105"> {/* Fixed height for uniformity */}
-                <div className="w-full h-56 flex-shrink-0">
-                  <img
-                    src={item.img}
-                    alt={item.name}
-                    className="w-full h-full object-cover"
-                  />
-                </div>
-                <div className="p-6 flex flex-col flex-grow">
-                  <h2 className="text-2xl font-bold text-white mb-4 break-words">
-                    {item.name}
-                  </h2>
-                  <p className="text-gray-300 text-sm leading-relaxed flex-grow overflow-auto break-words">
-                    {item.info}
-                  </p>
+        {sliderData.length > 0 ? (
+          <Slider {...settings}>
+            {sliderData.map((item, index) => (
+              <div key={index} className="px-4">
+                <div className="bg-gray-800 rounded-xl overflow-hidden shadow-xl h-[600px] flex flex-col transform transition-transform duration-300 hover:scale-105">
+                  <div className="w-full h-56 flex-shrink-0">
+                    <img
+                      src={item.img}
+                      alt={item.name}
+                      className="w-full h-full object-cover"
+                    />
+                  </div>
+                  <div className="p-6 flex flex-col flex-grow">
+                    <h2 className="text-2xl font-bold text-white mb-4 break-words">
+                      {item.name}
+                    </h2>
+                    <p className="text-gray-300 text-sm leading-relaxed flex-grow overflow-auto break-words">
+                      {item.info}
+                    </p>
 
-                  <div className="mt-auto"> {/* Button container to push buttons to bottom */}
-                    {/* READ MORE BUTTON */}
-                    <button
-                      onClick={() => handleReadMore(item.name)}
-                      className="w-full bg-pink-500 hover:bg-pink-600 text-white font-semibold py-2 px-4 rounded-lg transition-colors duration-200 transform hover:scale-105 mb-2"
-                    >
-                      Read More
-                    </button>
+                    <div className="mt-auto">
+                      <button
+                        onClick={() => handleReadMore(item.name)}
+                        className="w-full bg-pink-500 hover:bg-pink-600 text-white font-semibold py-2 px-4 rounded-lg transition-colors duration-200 transform hover:scale-105 mb-2"
+                      >
+                        Read More
+                      </button>
 
-                    {/* Admin-only Edit/Delete Buttons */}
-                    {isAdmin && (
-                      <div className="grid grid-cols-2 gap-2"> {/* Changed to grid for better spacing */}
-                        <button
-                          onClick={() => handleEditClick(index)}
-                          className="bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 px-2 rounded-lg transition text-sm"
-                        >
-                          Edit
-                        </button>
-                        <button
-                          onClick={() => handleDeleteItem(index)}
-                          className="bg-red-500 hover:bg-red-600 text-white font-semibold py-2 px-2 rounded-lg transition text-sm"
-                        >
-                          Delete
-                        </button>
-                      </div>
-                    )}
+                      {isAdmin && (
+                        <div className="grid grid-cols-2 gap-2">
+                          <button
+                            onClick={() => handleEditClick(index)}
+                            className="bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 px-2 rounded-lg transition text-sm"
+                          >
+                            Edit
+                          </button>
+                          <button
+                            onClick={() => handleDeleteItem(index)}
+                            className="bg-red-500 hover:bg-red-600 text-white font-semibold py-2 px-2 rounded-lg transition text-sm"
+                          >
+                            Delete
+                          </button>
+                        </div>
+                      )}
+                    </div>
                   </div>
                 </div>
               </div>
-            </div>
-          ))}
-        </Slider>
+            ))}
+          </Slider>
+        ) : (
+          <div className="text-center text-white p-8 bg-gray-800 rounded-lg">
+            <h2 className="text-2xl font-bold mb-4">No Tissues Available</h2>
+            <p className="text-gray-300">
+              {isAdmin 
+                ? "Click the 'Add New Tissue' button above to add your first tissue!"
+                : "Please check back later for tissue information."}
+            </p>
+          </div>
+        )}
       </div>
     </div>
   );
