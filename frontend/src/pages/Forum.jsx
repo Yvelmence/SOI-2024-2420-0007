@@ -38,7 +38,7 @@ function Forum() {
 
     // Check file type
     if (!isValidFileType(file)) {
-      alert('Please upload only images (JPEG, PNG, GIF, WEBP) or videos (MP4, WEBM, OGG)');
+      alert('Please upload only images (JPEG, PNG) or videos (MP4)');
       e.target.value = ''; // Reset input
       return;
     }
@@ -156,11 +156,15 @@ function Forum() {
             key={post._id}
             className="bg-gray-800 p-4 rounded-lg"
           >
-            <h2 className="text-xl font-bold">{post.title}</h2>
+            <h2 className="text-xl font-bold break-words break-all overflow-wrap-break-word w-full">
+              {post.title}
+            </h2>            
             <p className="text-sm text-gray-400 mt-1">
               Posted by: {post.userName || 'Anonymous'} | {new Date(post.createdAt).toLocaleString()}
             </p>
-            <p className="mt-2">{post.content}</p>
+            <p className="mt-2 break-words break-all whitespace-pre-wrap overflow-wrap-break-word line-clamp-3">
+              {post.content}
+            </p>
             {post.imageUrl && (
               <div className="mt-2">
                 {post.imageUrl.startsWith('data:image/') ? (

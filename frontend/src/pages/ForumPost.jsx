@@ -136,8 +136,11 @@ function ForumPost() {
       alert("Please log in to comment");
       return;
     }
-    if (!newComment.trim()) return;
-
+    if (!newComment.trim()) {
+      alert("Comment cannot be empty");
+      return;
+    }
+  
     try {
       const response = await fetch(`http://localhost:3000/api/forum/${id}/comments`, {
         method: 'POST',
@@ -146,24 +149,32 @@ function ForumPost() {
         },
         body: JSON.stringify({
           postId: id,
-          text: newComment,
+          text: newComment.trim(),
           userId: user.id,
           userName: user.fullName || user.username
         }),
       });
-
-      if (!response.ok) throw new Error('Failed to add comment');
+  
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'Failed to add comment');
+      }
+  
       const newCommentData = await response.json();
       setComments(prevComments => [newCommentData, ...prevComments]);
       setNewComment("");
     } catch (error) {
       console.error("Error:", error);
+      alert(error.message);
     }
   };
 
   const handleEditComment = async () => {
-    if (!editedCommentText.trim()) return;
-
+    if (!editedCommentText.trim()) {
+      alert("Comment cannot be empty");
+      return;
+    }
+  
     try {
       const response = await fetch(`http://localhost:3000/api/forum/comments/${editingCommentId}`, {
         method: 'PUT',
@@ -175,8 +186,11 @@ function ForumPost() {
           userId: user.id
         }),
       });
-
-      if (!response.ok) throw new Error('Failed to edit comment');
+  
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'Failed to edit comment');
+      }
       
       setComments(prevComments => 
         prevComments.map(comment => 
@@ -189,10 +203,16 @@ function ForumPost() {
       setEditedCommentText("");
     } catch (error) {
       console.error("Error:", error);
+      alert(error.message);
     }
   };
 
   const handleDeleteComment = async (commentId) => {
+    // Add confirmation prompt
+    if (!window.confirm("Are you sure you want to delete this comment?")) {
+      return;
+    }
+  
     try {
       const response = await fetch(`http://localhost:3000/api/forum/comments/${commentId}`, {
         method: 'DELETE',
@@ -201,12 +221,37 @@ function ForumPost() {
         },
         body: JSON.stringify({ userId: user.id })
       });
-
+  
       if (!response.ok) throw new Error('Failed to delete comment');
       
       setComments(prevComments => prevComments.filter(comment => comment._id !== commentId));
     } catch (error) {
       console.error("Error:", error);
+      alert(error.message);
+    }
+  };
+  
+  const handleAdminDeleteComment = async (commentId) => {
+    // Add confirmation prompt
+    if (!window.confirm("Are you sure you want to delete this comment?")) {
+      return;
+    }
+    
+    try {
+      const response = await fetch(`http://localhost:3000/api/forum/admin/comments/${commentId}`, {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ adminId: user.id })
+      });
+  
+      if (!response.ok) throw new Error('Failed to delete comment');
+      
+      setComments(prevComments => prevComments.filter(comment => comment._id !== commentId));
+    } catch (error) {
+      console.error("Error:", error);
+      alert(error.message);
     }
   };
 
@@ -271,15 +316,13 @@ function ForumPost() {
             </div>
           </div>
         ) : (
-          <div className="bg-gray-800 p-6 rounded-lg">
-            <h1 className="text-4xl font-bold">{post.title}</h1>
-            <div className="flex items-center mt-2 text-gray-400">
+          <div className="bg-gray-800 p-6 rounded-lg overflow-hidden">
+            <h1 className="text-4xl font-bold break-words overflow-hidden">{post.title}</h1>            <div className="flex items-center mt-2 text-gray-400">
               <p>Posted by: {post.userName || 'Anonymous'}</p>
               <span className="mx-2">•</span>
               <p>{new Date(post.createdAt).toLocaleString()}</p>
             </div>
-            <p className="mt-4 text-lg whitespace-pre-wrap">{post.content}</p>
-            {post.imageUrl && (
+            <p className="mt-4 text-lg whitespace-pre-wrap break-words overflow-hidden">{post.content}</p>            {post.imageUrl && (
               <img
                 src={post.imageUrl}
                 alt={post.title}
@@ -338,7 +381,7 @@ function ForumPost() {
 
           <div className="mt-6 space-y-4">
             {comments.map((comment) => (
-              <div key={comment._id} className="bg-gray-800 p-4 rounded-lg">
+              <div key={comment._id} className="bg-gray-800 p-4 rounded-lg overflow-hidden">
                 <div className="flex items-center justify-between mb-2">
                   <p className="font-medium text-blue-400">
                     {comment.userName || 'Anonymous'}
@@ -376,28 +419,32 @@ function ForumPost() {
                   </div>
                 ) : (
                   <div className="flex justify-between items-start">
-                    <p className="text-gray-100 flex-grow">{comment.text}</p>
+                    <p className="text-gray-100 flex-grow whitespace-pre-wrap break-words overflow-hidden max-w-[calc(100%-6rem)]">{comment.text}</p>
                     {user && (user.id === comment.userId || user.publicMetadata?.role === 'admin') && (
-                      <div className="flex space-x-2 ml-4">
-                        {user.id === comment.userId && (
-                          <button
-                            onClick={() => {
-                              setEditingCommentId(comment._id);
-                              setEditedCommentText(comment.text);
-                            }}
-                            className="bg-blue-500 hover:bg-blue-600 px-2 py-1 rounded-lg text-sm"
-                          >
-                            Edit
-                          </button>
-                        )}
+                      <div className="flex space-x-2 ml-4 shrink-0">
+                      {user.id === comment.userId && (
                         <button
-                          onClick={() => handleDeleteComment(comment._id)}
-                          className="bg-red-500 hover:bg-red-600 px-2 py-1 rounded-lg text-sm"
+                          onClick={() => {
+                            setEditingCommentId(comment._id);
+                            setEditedCommentText(comment.text);
+                          }}
+                          className="bg-blue-500 hover:bg-blue-600 px-2 py-1 rounded-lg text-sm"
                         >
-                          Delete
+                          Edit
                         </button>
-                      </div>
-                    )}
+                      )}
+                      <button
+                        onClick={() => 
+                          user.publicMetadata?.role === 'admin' 
+                            ? handleAdminDeleteComment(comment._id) 
+                            : handleDeleteComment(comment._id)
+                        }
+                        className="bg-red-500 hover:bg-red-600 px-2 py-1 rounded-lg text-sm"
+                      >
+                        Delete
+                      </button>
+                    </div>
+                  )}
                   </div>
                 )}
               </div>
