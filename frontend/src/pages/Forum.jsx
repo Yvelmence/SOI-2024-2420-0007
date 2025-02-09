@@ -36,17 +36,15 @@ function Forum() {
     const file = e.target.files[0];
     if (!file) return;
 
-    // Check file type
     if (!isValidFileType(file)) {
-      alert('Please upload only images (JPEG, PNG, GIF, WEBP) or videos (MP4, WEBM, OGG)');
-      e.target.value = ''; // Reset input
+      alert('Please upload only images (JPEG, PNG) or videos (MP4)');
+      e.target.value = '';
       return;
     }
 
-    // Check file size
     if (file.size > MAX_FILE_SIZE) {
       alert('File size must be less than 50MB');
-      e.target.value = ''; // Reset input
+      e.target.value = '';
       return;
     }
 
@@ -97,95 +95,117 @@ function Forum() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-900 text-white p-8">
-      <h1 className="text-4xl font-bold text-center">Tissue Science Forum</h1>
-
-      {user ? (
-        <div className="mt-6 bg-gray-800 p-4 rounded-lg">
-          <h2 className="text-2xl font-bold mb-2">Create a New Post</h2>
-          <input
-            type="text"
-            className="w-full p-2 bg-gray-700 rounded-lg mb-2"
-            placeholder="Post Title"
-            value={newTitle}
-            onChange={(e) => setNewTitle(e.target.value)}
-          />
-          <textarea
-            className="w-full p-2 bg-gray-700 rounded-lg mb-2"
-            placeholder="Write your discussion..."
-            value={newContent}
-            onChange={(e) => setNewContent(e.target.value)}
-          />
-          <input 
-            type="file" 
-            accept="image/*, video/*" 
-            onChange={handleFileUpload}
-            className="text-white" 
-          />
-          {newFile && (
-            <div className="mt-2">
-              {newFile.startsWith('data:image/') ? (
-                <img
-                  src={newFile}
-                  alt="Preview"
-                  className="mt-2 h-40 object-cover rounded-lg"
-                />
-              ) : (
-                <video
-                  src={newFile}
-                  controls
-                  className="mt-2 h-40 w-full rounded-lg"
-                />
-              )}
-            </div>
-          )}
-          <button
-            onClick={handleAddPost}
-            className="mt-2 bg-pink-500 hover:bg-pink-600 px-4 py-2 rounded-lg w-full"
-          >
-            Post
-          </button>
+    <div className="min-h-screen bg-gradient-to-b from-gray-900 via-gray-800 to-gray-900">
+      <div className="max-w-4xl mx-auto px-4 py-8 sm:px-6 lg:px-8">
+        {/* Header */}
+        <div className="text-center mb-12">
+          <h1 className="text-5xl font-bold text-white mb-4 bg-clip-text text-transparent bg-gradient-to-r from-pink-500 to-violet-500">
+            Tissue Science Forum
+          </h1>
+          <p className="text-gray-400">Join the discussion with fellow scientists and researchers</p>
         </div>
-      ) : (
-        <p className="mt-4 text-center">Please log in to create a post.</p>
-      )}
 
-      <div className="mt-6 space-y-4">
-        {posts.map((post) => (
-          <div
-            key={post._id}
-            className="bg-gray-800 p-4 rounded-lg"
-          >
-            <h2 className="text-xl font-bold">{post.title}</h2>
-            <p className="text-sm text-gray-400 mt-1">
-              Posted by: {post.userName || 'Anonymous'} | {new Date(post.createdAt).toLocaleString()}
-            </p>
-            <p className="mt-2">{post.content}</p>
-            {post.imageUrl && (
-              <div className="mt-2">
-                {post.imageUrl.startsWith('data:image/') ? (
-                  <img 
-                    src={post.imageUrl} 
-                    alt={post.title}
-                    className="mt-2 h-40 object-cover rounded-lg" 
-                  />
-                ) : post.imageUrl.startsWith('data:video/') ? (
-                  <video
-                    src={post.imageUrl}
-                    controls
-                    className="mt-2 h-40 w-full rounded-lg"
-                  />
-                ) : null}
+        {/* Create Post Section */}
+        {user ? (
+          <div className="mb-12 bg-gray-800/50 backdrop-blur-sm rounded-2xl p-6 border border-gray-700/50 shadow-xl">
+            <h2 className="text-2xl font-bold text-white mb-6">Create a New Post</h2>
+            <div className="space-y-4">
+              <input
+                type="text"
+                className="w-full px-4 py-3 bg-gray-700/50 rounded-xl border border-gray-600 focus:border-pink-500 focus:ring-2 focus:ring-pink-500/20 transition-all duration-200 text-white placeholder-gray-400"
+                placeholder="Post Title"
+                value={newTitle}
+                onChange={(e) => setNewTitle(e.target.value)}
+              />
+              <textarea
+                className="w-full px-4 py-3 bg-gray-700/50 rounded-xl border border-gray-600 focus:border-pink-500 focus:ring-2 focus:ring-pink-500/20 transition-all duration-200 text-white placeholder-gray-400 min-h-[120px]"
+                placeholder="Write your discussion..."
+                value={newContent}
+                onChange={(e) => setNewContent(e.target.value)}
+              />
+              <div className="relative">
+                <input 
+                  type="file" 
+                  accept="image/*, video/*" 
+                  onChange={handleFileUpload}
+                  className="block w-full text-gray-400 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-pink-500/10 file:text-pink-500 hover:file:bg-pink-500/20 file:cursor-pointer cursor-pointer"
+                />
               </div>
-            )}
-            <button
-              onClick={() => navigate(`/forum/${post._id}`)}
-              className="mt-2 bg-blue-500 hover:bg-blue-600 px-4 py-2 rounded-lg w-full"
-            >
-              View Post
-            </button>
+              {newFile && (
+                <div className="mt-4">
+                  {newFile.startsWith('data:image/') ? (
+                    <img
+                      src={newFile}
+                      alt="Preview"
+                      className="rounded-xl h-48 w-full object-cover"
+                    />
+                  ) : (
+                    <video
+                      src={newFile}
+                      controls
+                      className="rounded-xl h-48 w-full object-cover"
+                    />
+                  )}
+                </div>
+              )}
+              <button
+                onClick={handleAddPost}
+                className="w-full py-3 bg-gradient-to-r from-pink-500 to-violet-500 rounded-xl font-semibold text-white hover:from-pink-600 hover:to-violet-600 transition-all duration-200 shadow-lg hover:shadow-pink-500/25"
+              >
+                Post Discussion
+              </button>
+            </div>
           </div>
-        ))}
+        ) : (
+          <div className="mb-12 text-center py-8 bg-gray-800/50 backdrop-blur-sm rounded-2xl border border-gray-700/50">
+            <p className="text-gray-300 text-lg">Please log in to create a post</p>
+          </div>
+        )}
+
+        {/* Posts List */}
+        <div className="space-y-6">
+          {posts.map((post) => (
+            <div
+              key={post._id}
+              className="bg-gray-800/50 backdrop-blur-sm rounded-2xl p-6 border border-gray-700/50 hover:border-pink-500/50 transition-all duration-300 group"
+            >
+              <h2 className="text-2xl font-bold text-white mb-2 break-words">
+                {post.title}
+              </h2>
+              <div className="flex items-center gap-2 text-sm text-gray-400 mb-4">
+                <span>{post.userName || 'Anonymous'}</span>
+                <span>•</span>
+                <span>{new Date(post.createdAt).toLocaleString()}</span>
+              </div>
+              <p className="text-gray-300 break-words whitespace-pre-wrap line-clamp-3 mb-4">
+                {post.content}
+              </p>
+              {post.imageUrl && (
+                <div className="mb-4">
+                  {post.imageUrl.startsWith('data:image/') ? (
+                    <img 
+                      src={post.imageUrl} 
+                      alt={post.title}
+                      className="rounded-xl h-48 w-full object-cover" 
+                    />
+                  ) : post.imageUrl.startsWith('data:video/') ? (
+                    <video
+                      src={post.imageUrl}
+                      controls
+                      className="rounded-xl h-48 w-full object-cover"
+                    />
+                  ) : null}
+                </div>
+              )}
+              <button
+                onClick={() => navigate(`/forum/${post._id}`)}
+                className="w-full py-3 bg-gray-700/50 rounded-xl font-semibold text-white hover:bg-gray-700/50 transition-all duration-300 group-hover:bg-gradient-to-r hover:from-pink-500 hover:to-violet-500"
+              >
+                View Full Discussion
+              </button>
+            </div>
+          ))}
+        </div>
       </div>
     </div>
   );

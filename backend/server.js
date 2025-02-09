@@ -10,8 +10,6 @@ const connectDB = require('./db');
 const Question = require('./quiz_questions_db');
 const User = require('./user_model');
 const mongoose = require('mongoose');
-const TissueList = require('./models/TissueList') ;
-const Tissue = require('./models/TissueDetails') ;
 
 const app = express();
 const PORT = 3000;
@@ -65,42 +63,6 @@ app.get('/api/questions', async (req, res) => {
   }
 });
 
-// Updated Image Prediction Endpoint for Teachable Machine
-app.post('/predict', upload.single('image'), async (req, res) => {
-  if (!model) {
-    return res.status(500).send({ error: 'Model not loaded' });
-  }
-
-  if (!req.file) {
-    return res.status(400).send({ error: 'No image uploaded' });
-  }
-
-  try {
-    // Process image according to Teachable Machine's requirements
-    const tensor = tf.tidy(() => {
-      const decodedImage = tf.node.decodeImage(req.file.buffer);
-      // Teachable Machine models typically expect 224x224 images
-      const resized = tf.image.resizeBilinear(decodedImage, [224, 224]);
-      // Normalize to [-1, 1]
-      const normalized = resized.toFloat().div(127.5).sub(1);
-      return normalized.expandDims();
-    });
-
-    const predictions = await model.predict(tensor).data();
-    tensor.dispose();
-
-    const predictedIndex = Array.from(predictions).indexOf(Math.max(...predictions));
-    const confidence = (predictions[predictedIndex] * 100).toFixed(2);
-
-    res.send({
-      label: MODEL_CLASSES[predictedIndex],
-      confidence: `${confidence}%`,
-    });
-  } catch (error) {
-    console.error('Error in prediction:', error);
-    res.status(500).send({ error: 'Prediction failed' });
-  }
-});
 
 // Other quiz endpoints
 app.get('/api/quizzes', async (req, res) => {
@@ -238,7 +200,13 @@ app.listen(PORT, () => {
 
 // POST: Add a comment to a specific forum post
 app.post('/api/forum/:id/comments', async (req, res) => {
-  const { text, userId } = req.body;  // Optionally include userId for the comment
+  const { text, userId } = req.body;
+
+  // Add empty comment validation
+  if (!text || !text.trim()) {
+    return res.status(400).json({ message: 'Comment cannot be empty' });
+  }
+
   const newComment = new ForumComment({ postId: req.params.id, text, userId });
   try {
     await newComment.save();
@@ -248,7 +216,6 @@ app.post('/api/forum/:id/comments', async (req, res) => {
     res.status(400).json({ message: 'Error adding comment', error: err.message });
   }
 });
-
 
 
 
@@ -285,6 +252,11 @@ app.get('/api/forum', async (req, res) => {
 // PUT: Edit a comment
 app.put('/api/forum/comments/:commentId', async (req, res) => {
   const { text, userId } = req.body;
+  
+  if (!text || !text.trim()) {
+    return res.status(400).json({ message: 'Comment cannot be empty' });
+  }
+
   try {
     const comment = await ForumComment.findById(req.params.commentId);
     
@@ -303,6 +275,29 @@ app.put('/api/forum/comments/:commentId', async (req, res) => {
     res.status(500).json({ message: 'Error updating comment', error: err.message });
   }
 });
+
+// Admin route to delete any post - Place this BEFORE the regular delete route
+app.delete('/api/forum/admin/:id', async (req, res) => {
+  const { adminId } = req.body;
+  try {
+    const post = await ForumPost.findById(req.params.id);
+    
+    if (!post) {
+      return res.status(404).json({ message: 'Post not found' });
+    }
+
+    // Delete associated comments
+    await ForumComment.deleteMany({ postId: req.params.id });
+    // Delete the post
+    await ForumPost.findByIdAndDelete(req.params.id);
+    
+    res.json({ message: "Forum post and comments deleted successfully" });
+  } catch (err) {
+    console.error('Error deleting forum post:', err);
+    res.status(500).json({ message: 'Error deleting forum post', error: err.message });
+  }
+});
+
 
 // DELETE: Delete a comment
 app.delete('/api/forum/comments/:commentId', async (req, res) => {
@@ -395,66 +390,11 @@ app.post('/predict', upload.single('image'), async (req, res) => {
   }
 });
 
-// Other quiz endpoints
-app.get('/api/quizzes', async (req, res) => {
-  try {
-    const quizzes = await mongoose.connection.collection('quizzes').find().toArray();
-    res.json(quizzes);
-  } catch (err) {
-    console.error('Error fetching quizzes:', err);
-    res.status(500).json({ message: 'Error fetching quizzes', error: err.message });
-  }
-});
 
-app.get('/api/quizzes/:collectionName', async (req, res) => {
-  const { collectionName } = req.params;
-  try {
-    const questions = await mongoose.connection.collection(collectionName).find().toArray();
-    res.json(questions);
-  } catch (err) {
-    console.error('Error fetching quiz questions:', err);
-    res.status(500).json({ message: 'Error fetching quiz questions', error: err.message });
-  }
-});
 
-app.get('/api/:collectionName', async (req, res) => {
-  const { collectionName } = req.params;
-  try {
-    const questions = await mongoose.connection.collection(collectionName).find().toArray();
-    if (!questions) {
-      return res.status(404).json({ message: `Collection ${collectionName} not found` });
-    }
-    res.json(questions);
-  } catch (err) {
-    console.error(`Error fetching data from collection ${collectionName}:`, err);
-    res.status(500).json({ message: 'Error fetching collection data', error: err.message });
-  }
-});
 
-//For tissuelist
-// Fetching all tissue list data
-app.get('/api/tissuelist', async (req, res) => {
-  try {
-    const tissues = await TissueList.find(); // Mongoose query to find all documents
-    console.log('Fetched Data:', tissues); // Log fetched data for debugging
-    res.json(tissues); // Return the data in JSON format
-  } catch (error) {
-    console.error('Error fetching tissues:', error);
-    res.status(500).json({ error: 'Internal Server Error' });
-  }
-});
 
-//For tissue
-// Fetching tissue details by organ name
-app.get('/api/tissues/:name', async (req, res) => {
-  try {
-    const tissue = await Tissue.findOne({ organ: req.params.name }); // Use `organ` instead of `name`
-    if (!tissue) return res.status(404).json({ message: 'Tissue not found' });
-    res.json(tissue); // Return the tissue details
-  } catch (error) {
-    res.status(500).json({ message: 'Error fetching tissue data' });
-  }
-});
+
 
 
 
