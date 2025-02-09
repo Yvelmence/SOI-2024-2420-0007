@@ -8,6 +8,7 @@ import ChatBot from './pages/ChatBot';
 import Quiz from './pages/Quiz';
 import Home from './pages/Home';
 import QuizSelection from './components/Quiz/QuizSelection';
+import UnifiedQuizPage from './components/Quiz/QuizManager';
 import TissueDetails from './pages/TissueDetails';
 import TissueList from './pages/TissueList';
 import Information from './pages/Information';
@@ -36,7 +37,7 @@ function App() {
               element={
                 <>
                   <SignedIn>
-                    <QuizSelection />
+                    <UnifiedQuizPage />
                   </SignedIn>
                   <SignedOut>
                     <RedirectToSignIn />

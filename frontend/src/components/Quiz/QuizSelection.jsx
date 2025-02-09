@@ -20,7 +20,7 @@ function QuizSelection() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-gray-900 via-gray-800 to-gray-900">
+    <div className="flex-1 overflow-y-auto p-6">
       {/* Header Section */}
       <div className="px-6 py-8 sm:py-12">
         <h1 className="text-5xl font-bold text-center mb-4 bg-clip-text text-transparent bg-gradient-to-r from-pink-500 to-violet-500">

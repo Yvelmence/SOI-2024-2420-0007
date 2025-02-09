@@ -1,5 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
+
+
 
 function Quiz() {
   const { collectionName } = useParams();  // Get the collectionName from the URL params
@@ -11,6 +14,7 @@ function Quiz() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [answerDetails, setAnswerDetails] = useState([]);
+  const navigate = useNavigate();
 
   // Fetch questions from backend
   useEffect(() => {
@@ -116,6 +120,16 @@ function Quiz() {
               </tbody>
             </table>
           </div>
+          <div className="mt-5">
+          <button
+            onClick={() => navigate('/quizzes')} // Navigate to /quizzes
+            className="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-700"
+          >
+            Back to Quizzes
+          </button>
+
+          </div>
+          
         </div>
       ) : (
         <div className="question-section text-center p-6 rounded-lg shadow-md w-full max-w-3xl mx-auto bg-gray-800"> {/* Added a contrasting background */}
