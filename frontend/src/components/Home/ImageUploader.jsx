@@ -28,7 +28,7 @@ function ImageUploader({ onImageChange, onSend, image }) {
                     onClick={onSend}
                     className="w-full sm:w-1/3 py-3 bg-gradient-to-r from-pink-500 to-violet-500 rounded-xl font-semibold text-white hover:from-pink-600 hover:to-violet-600 transition-all duration-200 shadow-lg hover:shadow-pink-500/25"
                 >
-                    Analyze
+                    Analyse
                 </button>
             </div>
         </div>

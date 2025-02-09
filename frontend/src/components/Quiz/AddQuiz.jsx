@@ -178,7 +178,7 @@ const AddQuizForm = () => {
               <button
                 type="button"
                 onClick={() => removeQuestion(questionIndex)}
-                className="mt-4 text-Black px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-700 focus:outline-none"
+                className="mt-4 text-Black px-4 py-2 bg-pink-500 font-semibold text-white rounded-md hover:bg-pink-700 focus:outline-none"
               >
                 Remove Question
               </button>
@@ -189,7 +189,7 @@ const AddQuizForm = () => {
           <button
             type="button"
             onClick={addQuestion}
-            className="mt-4 text-white px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-700 focus:outline-none"
+            className="mt-4 text-white px-4 py-2 bg-pink-500 font-semibold text-white rounded-md hover:bg-pink-700 focus:outline-none"
           >
             Add Question
           </button>
@@ -197,7 +197,7 @@ const AddQuizForm = () => {
 
         {/* Submit Button */}
         <div className="text-center">
-          <button type="submit" className="max-w-xs px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-700 focus:outline-none">
+          <button type="submit" className="max-w-xs px-4 py-2 bg-pink-500 font-semibold text-white rounded-md hover:bg-pink-700 focus:outline-none">
             Create Quiz
           </button>
         </div>

@@ -20,7 +20,7 @@ function UnifiedQuizPage() {
                 <br></br>
               <button
                 onClick={handleGoToAddQuiz}
-                className="max-w-xs px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-700 focus:outline-none"
+                className="max-w-xs px-4 py-2 bg-purple-500 font-semibold text-white rounded-md hover:bg-purple-700 focus:outline-none"
               >
                 Go to Add Quiz
               </button>
@@ -34,14 +34,14 @@ function UnifiedQuizPage() {
             <br></br>
               <button
                 onClick={handleGoToQuizSelection}
-                className="max-w-xs px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-700 focus:outline-none"
+                className="max-w-xs px-4 py-2 bg-purple-500 font-semibold text-white rounded-md hover:bg-purple-700 focus:outline-none"
               >
                 Back to Quiz Selection
               </button>
             </div>
           </>
         )}
-      </div>
+      </div> 
     </div>
   );
 }
