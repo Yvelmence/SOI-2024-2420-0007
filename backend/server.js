@@ -100,6 +100,48 @@ app.get('/api/:collectionName', async (req, res) => {
   }
 });
 
+// New API route to handle creation of quizzes and their questions
+app.post('/api/create-quiz', async (req, res) => {
+  const { quizName, questions } = req.body;
+
+  if (!quizName || !Array.isArray(questions) || questions.length === 0) {
+    return res.status(400).json({ message: "Quiz name and at least one question are required" });
+  }
+
+  try {
+    // Step 1: Create a quiz metadata entry in the 'quizzes' collection
+    const collectionName = `questions${Date.now()}`;
+    const quizResult = await mongoose.connection.collection('quizzes').insertOne({
+      quizName,
+      collectionName,
+    });
+    const quizId = quizResult.insertedId;
+
+    // Step 2: Create the collection for questions dynamically
+    const questionsCollection = mongoose.connection.collection(collectionName);
+    
+    // Add the questions to the dynamically created collection
+    const questionEntries = questions.map((q, index) => ({
+      quiz_id: quizId,
+      question: q.question,
+      image: q.image || '',
+      answerOptions: q.answerOptions,
+    }));
+    
+    await questionsCollection.insertMany(questionEntries);
+
+    res.status(201).json({
+      message: `Quiz "${quizName}" created successfully!`,
+      quizId: quizId,
+      collectionName: collectionName,
+    });
+  } catch (error) {
+    console.error("Error creating quiz:", error);
+    res.status(500).json({ message: "Error creating quiz", error: error.message });
+  }
+});
+
+
 // ============================
 // Forum Endpoints using Mongoose
 // ============================
