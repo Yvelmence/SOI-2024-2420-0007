@@ -9,8 +9,6 @@ const NavLinks = () => (
       <Link to="/chatbot" className="hover:text-purple-200 transition-colors">ChatBot</Link>
       <Link to="/forum" className="hover:text-pink-200 transition-colors">Forum</Link>
       <Link to="/quizzes" className="hover:text-pink-200 transition-colors">Quiz</Link>
-      <Link to="/tissuelist" className="hover:text-pink-200 transition-colors">Lists of Tissues</Link>
-
       <UserButton afterSignOutUrl="/" />
     </SignedIn>
     <SignedOut>
