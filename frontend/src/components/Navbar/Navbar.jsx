@@ -6,7 +6,7 @@ import { FaBars, FaTimes } from 'react-icons/fa';
 const NavLinks = () => (
   <>
     <SignedIn>
-      <Link to="/chatbot" className="hover:text-purple-200 transition-colors">ChatBot</Link>
+      <Link to="/analyser" className="hover:text-purple-200 transition-colors">Tissue Analyser</Link>
       <Link to="/forum" className="hover:text-pink-200 transition-colors">Forum</Link>
       <Link to="/quizzes" className="hover:text-pink-200 transition-colors">Quiz</Link>
       <UserButton afterSignOutUrl="/" />

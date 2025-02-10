@@ -4,7 +4,7 @@ import { SignIn, SignUp, SignedIn, SignedOut, RedirectToSignIn } from '@clerk/cl
 
 import './index.css';
 import Navbar from './components/Navbar/Navbar';
-import ChatBot from './pages/ChatBot';
+import Analyser from './pages/Analyser';
 import Quiz from './pages/Quiz';
 import Home from './pages/Home';
 import QuizSelection from './components/Quiz/QuizSelection';
@@ -24,7 +24,7 @@ function App() {
           <Routes>
             {/* Public Routes */}
             <Route path="/" element={<Home />} />
-            <Route path="/chatbot" element={<ChatBot />} />
+            <Route path="/analyser" element={<Analyser />} />
             <Route path="/forum" element={<Forum />} />
             <Route path="/forum/:id" element={<ForumPost />} />
             <Route path="/tissue/:name" element={<TissueDetails />} />
