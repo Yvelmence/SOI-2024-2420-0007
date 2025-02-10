@@ -24,7 +24,9 @@ function Forum() {
         const response = await fetch("http://localhost:3000/api/forumposts");
         if (!response.ok) throw new Error("Failed to fetch forum posts");
         const data = await response.json();
-        setPosts(data);
+        // Sort before setting state
+        const sortedPosts = data.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+        setPosts(sortedPosts);
       } catch (error) {
         console.error("Error fetching forum posts:", error.message);
       }
